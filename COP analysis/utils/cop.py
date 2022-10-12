@@ -120,7 +120,7 @@ class CenterOfPressure:
         return d_cop_x, d_cop_y
 
     # Plot ---------------------------------------------------------------------------------------------
-    def plot_foot(self, side, session):
+    def plot_foot(self, side):
         data = self.get_cop_foot(side)  # Get the COP data for the foot
         plt.figure(figsize=(4, 4))  # Set the size of the graph
         plt.plot(data[0], data[1])  # Plot the COP
@@ -134,11 +134,11 @@ class CenterOfPressure:
         plt.ylabel("Position [mm]")
 
         time_now = time.strftime("%Y%m%d-%H%M%S")  # Current time
-        filename = f"{session}_{side}_COP_{time_now}.png"  # Name of the graph
+        filename = f"_{side}_COP_{time_now}.png"  # Name of the graph
         self.save_graph(plt, filename)  # Save the graph
 
 
-    def plot_both_feet(self, session):
+    def plot_both_feet(self):
         left_x, left_y = self.get_cop_foot('left')
         right_x, right_y = self.get_cop_foot('right')
         
@@ -153,7 +153,7 @@ class CenterOfPressure:
         plt.ylabel("Position [mm]")
 
         time_now = time.strftime("%Y%m%d-%H%M%S")  # Current time
-        filename = f"{session}_both_COP_{time_now}.png"  # Name of the graph
+        filename = f"both_COP_{time_now}.png"  # Name of the graph
         self.save_graph(plt, filename)  # Save the graph
         
         pass
