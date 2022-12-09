@@ -1,0 +1,9 @@
+data/
+classification/
+__pycache__
+*.h5
+*.png
+*.zip
+*.tflite
+*.h5
+graphs/
