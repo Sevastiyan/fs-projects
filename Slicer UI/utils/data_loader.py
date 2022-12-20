@@ -134,7 +134,7 @@ def convert_to_pressure(data, regression_coefficients):
             continue
     return pressure_data
 
-def convert_signal(data, type):
+def convert_signal(data, type: str):
     if type == "acc":
         x = data[['acc_x', 'acc_y', 'acc_z']]
         # data = data.iloc[:, 14:17]

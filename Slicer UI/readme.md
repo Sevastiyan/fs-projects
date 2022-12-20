@@ -4,8 +4,9 @@
 
 | Status | Task                                     | Description |
 | ------ | ---------------------------------------- | ----------- |
-| [x]    | Create the app with progressive change   |             |
-| [ ]    | Slice gyro and pressure data             |             |
+| [X]    | Create the app with progressive change   |             |
+| [X]    | Slice gyro and pressure data             |             |
+| [ ]    | CoP Slicer Algorithm                     |             |
 | [ ]    | Add Overlap option                       |             |
 | [ ]    | Add photos detailing the process         |             |
 | [ ]    | Add dependency file for easy pip install |             |
@@ -14,26 +15,32 @@
 ---
 
 ## Using the Slicer UI
+    Please perform this task only for one incident type so that the data is homogenously classified in folders.
 
-    Currently please perform this task only for one incident type so that the end result will hold only one type of incidents. This will guarantee homogenous data for the STF training.
-
-Open the folder with VSCode and first install the necessary dependencies using `pip` by running the following commands in the terminal:
-
-**Note**: _This can be skipped if the environment has all the dependencies_ 
+navigate with the terminal to `Slicer UI` with the command line.
 ```
-pip3 install matplotlib numpy customtkinter
+$ cd "Slicer UI"
 ```
 
-Then open the file data_slicer.py and run the applicaiton from the `Play` button on top.
+Open the file `data_slicer.py` with VSCode. At the bottom there is a function called `main()`. Here you can set the name of the folder that should indicate which data you want to load and slice using the UI. Write the correct path e.g. `data/incidents/Trip`. Make sure that there is data within the folder selected.
 
-The script will load all the data files from the data folder and display the first data loaded on the graph. 
+To run the applicaiton from the `Play` button at top right. The script will load all the data files from the data folder and display the first sample loaded on the graph.
+
+![Alt text](resources/Screenshot%202022-12-20%20113213.png)
 
 The graph is divided into two sections. The top one displays the full session recording, and the second represents a slice of 200 indexes (_this number can be changed for different use cases_). The slice is indicated on the main graph with two vertical red lines, which indicate the starting point and the end point of the slice. Dragging the slice using the slider bellow the graph. 
 
-Once the selection is made click `Save` and the data will be memorised and extracted. After that the next data in the list of files will be shown. Perform this task for every subsequent session.
+There are four control buttons on the right:
+- **Slice** - Slices the sample within the current borders
+- **Skip** - Skips this current sample 
+- **Save** - Saves the data so far (can be saved at the end)
+- **Quit** - Quit the application after saving one last time
 
-    TODO: add photos detailing the process
+Once the selection is made click `Slice` and the slice will be extracted and memorised. After that the next sample from the files will be loaded. Perform this task for every subsequent sample. 
 
-The end result will be inside `/data/processed/<training set>/` which contains all of the selections. 
+If for any reason the data is not useful, you can click `Skip`.
 
+The progress bar on the left indicates how many files are left in the batch loaded. Full bar means that the last one has been loaded.
+
+When done click `Save` or `Quit`. The end result will be inside `/data/processed/<training set>/` which contains all of the selections in a compiled format that is ready for training. 
 

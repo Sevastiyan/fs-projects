@@ -1,4 +1,7 @@
 .vscode/
 *.zip
-*.png
+results/
 __pycache__/
+csv/
+json/
+data/
