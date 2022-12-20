@@ -18,7 +18,7 @@ class App(customtkinter.CTk):
     def __init__(self, data):  # Add the data source
         super().__init__()
 
-        self.geometry("700x700")
+        self.geometry("700x800")
         self.title("CustomTkinter")
         self.index = 0
         self.data = data
@@ -29,43 +29,51 @@ class App(customtkinter.CTk):
         self.fig, (self.ax1, self.ax2) = plt.subplots(2)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.mpl_connect("key_press_event", key_press_handler)
-        self.canvas.get_tk_widget().grid(row=0, column=0, columnspan=2, padx=20, pady=(20, 0), sticky="nsew")
+        self.canvas.get_tk_widget().grid(row=0, column=0, columnspan=3, padx=20, pady=(20, 0), sticky="nsew")
 
-        self.frame_1 = customtkinter.CTkFrame(master=self)
-        self.frame_1.grid(row=1, column=0, rowspan=3, padx=20, pady=20, sticky="ew")
+        self.control_frame = customtkinter.CTkFrame(master=self)
+        self.control_frame.grid(row=1, column=0, rowspan=4, padx=20, pady=(20, 0), sticky="ew")
+
+        self.folder_frame = customtkinter.CTkFrame(master=self)
+        self.folder_frame.grid(row=5, column=0, rowspan=2, padx=20, pady=(20, 0), sticky="ew")
 
         self.button_slice = customtkinter.CTkButton(
             master=self, text="Slice", fg_color="green", command=self.save_slice
         )
-        self.button_slice.grid(row=1, column=1, padx=20, pady=5, sticky="ew")
+        self.button_slice.grid(row=1, column=2, padx=20, pady=5, sticky="ew")
 
         self.button_skip = customtkinter.CTkButton(
             master=self, text="Skip", fg_color="orange", command=self.update_figure
         )
-        self.button_skip.grid(row=2, column=1, padx=20, pady=5, sticky="ew")
+        self.button_skip.grid(row=2, column=2, padx=20, pady=5, sticky="ew")
 
         self.button_save = customtkinter.CTkButton(master=self, text="Save", command=self.save_file)
-        self.button_save.grid(row=3, column=1, padx=20, pady=5, sticky="ew")
+        self.button_save.grid(row=3, column=2, padx=20, pady=5, sticky="ew")
 
         self.button_quit = customtkinter.CTkButton(master=self, text="Quit", fg_color="gray", command=self.quit)
-        self.button_quit.grid(row=4, column=1, padx=20, pady=5, sticky="ew")
+        self.button_quit.grid(row=4, column=2, padx=20, pady=5, sticky="ew")
 
-        # self.label_1 = customtkinter.CTkLabel(master=self, justify=tkinter.LEFT)
-        # self.label_1.pack(pady=12, padx=10)
+        self.text_var = tkinter.StringVar(value=f'Progress: ')
+        self.label_1 = customtkinter.CTkLabel(master=self.control_frame, textvariable=self.text_var)
+        self.label_1.pack(pady=12, padx=10)
 
-        self.progressbar_1 = customtkinter.CTkProgressBar(master=self.frame_1)
+        self.folder_label = customtkinter.CTkLabel(master=self.folder_frame, text='Folder: Not in Use at the moment')
+        self.folder_label.pack(pady=12, padx=10)
+        self.combobox = customtkinter.CTkComboBox(master=self.folder_frame, values=["Sample text 1", "Text 2"])
+        self.combobox.pack(pady=12, padx=10)
+
+        self.progressbar_1 = customtkinter.CTkProgressBar(master=self.control_frame)
         self.progressbar_1.pack(pady=12, padx=10)
-        self.progressbar_1.set(0.20)
         self.update_figure()  # has progress dependency.
 
         self.slider_1 = customtkinter.CTkSlider(
-            master=self.frame_1,
+            master=self.control_frame,
             command=self.move_slice,
             from_=0,
-            to=1,  # has t dependency from update_figure
+            to=1,
         )
         self.slider_1.pack(pady=12, padx=10)
-        self.slider_1.set(0.5)#len(self.t) / 2)
+        self.slider_1.set(0.5)
 
     def update_figure(self):
         print('------------------')
@@ -107,6 +115,7 @@ class App(customtkinter.CTk):
         length = len(self.data)
         progress = self.index / length
         self.progressbar_1.set(progress)
+        self.text_var.set(value=f'Progress: {self.index}/{length}')
         print('Progress: ', self.index, '/', length)
 
     def save_slice(self):
