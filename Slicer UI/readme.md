@@ -19,7 +19,7 @@
 
 navigate with the terminal to `Slicer UI` with the command line.
 ```
-$ cd "Slicer UI"
+C:/<User>/<project folder> cd "Slicer UI"
 ```
 
 Open the file `data_slicer.py` with VSCode. At the bottom there is a function called `main()`. Here you can set the name of the folder that should indicate which data you want to load and slice using the UI. Write the correct path e.g. `data/incidents/Trip`. Make sure that there is data within the folder selected.

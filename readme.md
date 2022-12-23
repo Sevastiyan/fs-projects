@@ -14,8 +14,8 @@ First navigate to the root folder of this repository with the command line/termi
 
 _This can be skipped if the environment has all the dependencies already._ 
 ```
-C:<User>/folder> pip3 install -r requirements.txt
-C:<User>/folder> pip3 install --upgrade  # optional
+pip3 install -r requirements.txt
+pip3 install --upgrade  # optional
 ```
 
 The `requirements.txt` file has all the dependecnies for the projects to run on any computer running with the python 3.6^ environment. Please make sure that the python is handling the current project either by **Anaconda** or python 3.6+ and above.
@@ -67,27 +67,19 @@ All of the data will be saved in the passed folder `download` will include the f
     For the purposes of Training a neural network for STF its advisable to put the data into the respective label folders.
 
 
-## Pre Processing:
-
-There are three different ways to pre-process the data.
-
-The recommended way to pre-process the data is using the newer Slicer UI, which will slice the data with the containing features (e.g. an incident) and save it in the correct labeled folder.
-
-First place the data in the data folder. 
-
 ## Using the Slicer UI
     Please perform this task only for one incident type so that the data is homogenously classified in folders.
 
-navigate with the terminal to `Slicer UI` with the command line.
+navigate with the terminal to `C:<User>/<project folder>/Slicer UI` with the command line.
 ```
-C:<User>/Slicer UI> cd "Slicer UI"
+cd "Slicer UI"
 ```
 
 Open the file `data_slicer.py` with VSCode. At the bottom there is a function called `main()`. Here you can set the name of the folder that should indicate which data you want to load and slice using the UI. Write the correct path e.g. `data/incidents/Trip`. Make sure that there is data within the folder selected.
 
 To run the applicaiton from the `Play` button at top right, or write the following command in the terminal:
 ```
-C:<User>/Slicer UI> python app.py
+python app.py
 ```
  The script will load all the data files from the data folder and display the first sample loaded on the graph.
 
@@ -110,3 +102,13 @@ The progress bar on the left indicates how many files are left in the batch load
 When done click `Save` or `Quit`. The end result will be inside `/data/processed/<training set>/` which contains all of the selections in a compiled format that is ready for training. 
 
 ---
+
+# Deprecated: 
+
+## Pre Processing:
+
+There are three different ways to pre-process the data.
+
+The recommended way to pre-process the data is using the newer Slicer UI, which will slice the data with the containing features (e.g. an incident) and save it in the correct labeled folder.
+
+First place the data in the data folder. 
