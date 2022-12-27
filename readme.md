@@ -2,11 +2,11 @@
 
 This repository contains small apps that can:
 
-1. [Extract data from database]()
-2. ~~[Pre-process data]()~~ replaced by [Slicer UI]()
-3. [Center Of Pressure]()
-4. [Displacement Metrics]()
-5. [Training Neural Networks for STF]()
+1. [Center Of Pressure](https://github.com/Sevastiyan/fs-projects/tree/main/COP%20analysis)
+2. [Extract data from database](https://github.com/Sevastiyan/fs-projects/tree/main/Extract%20data%20from%20database)
+3. ~~Pre-process data~~ replaced by [Slicer UI](https://github.com/Sevastiyan/fs-projects/tree/main/Slicer%20UI) - Check Archive
+4. [Displacement Metrics](https://github.com/Sevastiyan/fs-projects/tree/main/displacement_metrics)
+5. [Training Neural Networks for STF](https://github.com/Sevastiyan/fs-projects/tree/main/stf_main)
 
 ## Dependencies:
 
