@@ -87,7 +87,10 @@ class App(customtkinter.CTk):
         self.acc_signal, self.gyro_signal = self.get_signal(self.index)
         self.t = range(self.acc_signal.shape[0])
         (self.line,) = self.ax1.plot(self.t, self.acc_signal)
-        borders = (len(self.t) / 2, len(self.t) / 2 + 200)
+        # borders = (len(self.t) / 2, len(self.t) / 2 + 200)
+        print('slice before save', self.slider_1.get() * len(self.t))
+        borders = (self.slider_1.get() * len(self.t), self.slider_1.get() * len(self.t) + 200)
+
         self.left_border = self.ax1.axvline(borders[0], color='r')
         self.right_border = self.ax1.axvline(borders[1], color='r')
         (self.line2,) = self.ax2.plot(self.t, self.acc_signal)
@@ -125,6 +128,7 @@ class App(customtkinter.CTk):
 
     def save_slice(self):
         x = int(self.slider_1.get() * len(self.t)) # convert from fraction to data where
+        print('Slice after save', x)
         acc_slice = self.acc_signal[x : x + 200]
         if len(acc_slice) < 200:  # Padding
             acc_slice = np.resize(acc_slice, (200))
@@ -137,7 +141,7 @@ class App(customtkinter.CTk):
 
         print('Slice Shape: ', acc_slice.shape)
         self.update_figure()
-        self.slider_1.set(0.5) # len(self.t) / 2)
+        # self.slider_1.set(0.5) # len(self.t) / 2)
 
     def save_file(self):
         path = 'data/processed/'
@@ -157,7 +161,7 @@ class App(customtkinter.CTk):
 
 def main():
     # ----- Data Load -----
-    root = 'data/incidents/' # /2022-12-06/Embeded Insole/Slip'
+    root = 'data/2022-10/Raw Slip'
     file_list = []
     filenames = []
 
