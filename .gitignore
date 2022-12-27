@@ -1,7 +1,11 @@
 .vscode/
 *.zip
+
+data archive october to december
+
 results/
 __pycache__/
 csv/
 json/
 data/
+archive/

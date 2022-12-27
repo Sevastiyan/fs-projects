@@ -53,18 +53,13 @@ class App(customtkinter.CTk):
         self.button_quit = customtkinter.CTkButton(master=self, text="Quit", fg_color="gray", command=self.quit)
         self.button_quit.grid(row=4, column=2, padx=20, pady=5, sticky="ew")
 
+        # Navigation ------------------------------
         self.text_var = tkinter.StringVar(value=f'Progress: ')
         self.label_1 = customtkinter.CTkLabel(master=self.control_frame, textvariable=self.text_var)
         self.label_1.pack(pady=12, padx=10)
 
-        self.folder_label = customtkinter.CTkLabel(master=self.folder_frame, text='Folder: Not in Use at the moment')
-        self.folder_label.pack(pady=12, padx=10)
-        self.combobox = customtkinter.CTkComboBox(master=self.folder_frame, values=["Sample text 1", "Text 2"])
-        self.combobox.pack(pady=12, padx=10)
-
         self.progressbar_1 = customtkinter.CTkProgressBar(master=self.control_frame)
         self.progressbar_1.pack(pady=12, padx=10)
-        self.update_figure()  # has progress dependency.
 
         self.slider_1 = customtkinter.CTkSlider(
             master=self.control_frame,
@@ -75,11 +70,21 @@ class App(customtkinter.CTk):
         self.slider_1.pack(pady=12, padx=10)
         self.slider_1.set(0.5)
 
+        # Folders ----------------------------------
+        self.folder_label = customtkinter.CTkLabel(master=self.folder_frame, text='Folder: Not in Use at the moment')
+        self.folder_label.pack(pady=12, padx=10)
+
+        self.folders = os.listdir('data/')
+        self.combobox = customtkinter.CTkComboBox(master=self.folder_frame, values=self.folders)
+        self.combobox.pack(pady=12, padx=10)
+
+        self.update_figure()  # has progress dependency.
+
     def update_figure(self):
         print('------------------')
         self.ax1.clear()
         self.ax2.clear()
-        self.acc_signal, self.gyro_signal = self.get_signal()
+        self.acc_signal, self.gyro_signal = self.get_signal(self.index)
         self.t = range(self.acc_signal.shape[0])
         (self.line,) = self.ax1.plot(self.t, self.acc_signal)
         borders = (len(self.t) / 2, len(self.t) / 2 + 200)
@@ -92,13 +97,13 @@ class App(customtkinter.CTk):
         self.update_progress()
         self.canvas.draw()
 
-    def get_signal(self):
-        sample = self.data[self.index]
+    def get_signal(self, index):
+        sample = self.data[index]
         acc = convert_signal(sample, type='acc_total')
         gyro = convert_signal(sample, type='gyro_total')
         acc = acc.to_numpy()
         gyro = gyro.to_numpy()
-        print(f'index: {self.index}')
+        print(f'index: {index}')
         print(f'Acc shape {acc.shape}', f' Gyro shape {gyro.shape}')
 
         return acc, gyro

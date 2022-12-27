@@ -1,5 +1,7 @@
 data/
 classification/
+data archive october to december/
+
 __pycache__
 *.h5
 *.png
