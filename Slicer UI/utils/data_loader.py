@@ -5,6 +5,30 @@ import pandas as pd
 import numpy as np
 from utils.filters import butter_lowpass_filter
 
+def load_file(file, filter=False, regressions=None): 
+    # Read the data -------------------------------------------------------
+    raw_data = read_data(file)
+    x = pd.DataFrame()  # Buffer for filtered data
+    
+    # Filter the data -----------------------------------------------------
+    if filter:  # If the filter is not used
+        for col in raw_data.columns:
+            if col in ['time', 'Session_no', 'TIMESTAMP']:  # Don't filter
+                x[col] = raw_data[col]
+                continue
+            x[col] = butter_lowpass_filter(raw_data[col], cutoff=3, fs=20)
+    else:
+        x = raw_data
+
+    # convert to pressure -------------------------------------------------
+    if regressions:
+        if 'left' in file:
+            x = convert_to_pressure(x, regressions[0])
+        if 'right' in file:
+            x = convert_to_pressure(x, regressions[1])
+            
+    return x
+
 
 def load_data(files, filter=False, regressions=None):
     '''Loads data from ./data folder
