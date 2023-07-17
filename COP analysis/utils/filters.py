@@ -1,7 +1,7 @@
 from scipy.signal import butter, filtfilt
 
 
-def butter_lowpass_filter(signal, cutoff=5, fs=20, order=3):
+def butter_lowpass_filter(signal, cutoff=5, fs=20, order=4):
     """Return a low-pass filtered signal."""
     nyq = 0.5 * fs  # Nyquist frequency
     normal_cutoff = cutoff / nyq  # Normalize the cutoff

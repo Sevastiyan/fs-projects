@@ -5,6 +5,38 @@ import pandas as pd
 import numpy as np
 from utils.filters import butter_lowpass_filter
 
+def load_file(file, filter=False, regressions=None): 
+    # Read the data -------------------------------------------------------
+    print('--------------')
+    raw_data = read_data(file)
+    x = pd.DataFrame()  # Buffer for filtered data
+    # Filter the data -----------------------------------------------------
+    if filter:  # If the filter is not used
+        print('Filtering data')
+        for col in raw_data.columns:
+            if col in ['acc_x', 'acc_y', 'acc_z', 'gyro_x',
+            'gyro_y', 'gyro_z', 'Session_no', 'Timestamp', 'battery']:  # Don't filter
+                x[col] = raw_data[col]
+                continue
+            x[col] = butter_lowpass_filter(raw_data[col], cutoff=1.8, fs=20)
+    else:
+        x = raw_data
+
+    # convert to pressure -------------------------------------------------
+    if regressions:
+        print('Converting to pressure:')
+        print('Right' if 'Right' in file else 'Left')
+        
+        if 'Left' in file:
+            print('left insole')                
+            x = convert_to_pressure(x, regressions[0])
+        if 'Right' in file:
+            print('right insole')                
+            x = convert_to_pressure(x, regressions[1])
+    # ---------------------------------------------------------------------
+            
+    return x
+
 
 def load_data(files, filter=False, regressions=None):
     '''Loads data from ./data folder
@@ -27,36 +59,37 @@ def load_data(files, filter=False, regressions=None):
     sessions = []
     for file in files:
         # Read the data -------------------------------------------------------
+        print('--------------')
         raw_data = read_data(file)
         x = pd.DataFrame()  # Buffer for filtered data
         # Filter the data -----------------------------------------------------
         if filter:  # If the filter is not used
+            print('Filtering data')
             for col in raw_data.columns:
-                if col in ['time', 'Session_no', 'TIMESTAMP']:  # Don't filter
+                if col in ['acc_x', 'acc_y', 'acc_z', 'gyro_x',
+                'gyro_y', 'gyro_z', 'Session_no', 'Timestamp', 'battery']:  # Don't filter
                     x[col] = raw_data[col]
                     continue
-                x[col] = butter_lowpass_filter(raw_data[col], cutoff=3, fs=20)
+                x[col] = butter_lowpass_filter(raw_data[col], cutoff=1.8, fs=20)
         else:
             x = raw_data
 
         # convert to pressure -------------------------------------------------
         if regressions:
-            if 'left' in file:
+            print('Converting to pressure:')
+            print('Right' if 'Right' in file else 'Left')
+            
+            if 'Left' in file:
+                print('left insole')                
                 x = convert_to_pressure(x, regressions[0])
-            if 'right' in file:
+            if 'Right' in file:
+                print('right insole')                
                 x = convert_to_pressure(x, regressions[1])
-
         # ---------------------------------------------------------------------
+        
         data.append(x)                 # Add the data to the buffer list
-    #     session = file.split('_')[-2:]
-    #     sessions.append(session)
-
-    # # Split the data into [(left, right)]
-    # data_set = list(zip(data[::2], data[1::2]))
-    # # Split the sessions into [(left, right)]
-    # session_set = list(zip(sessions[::2], sessions[1::2]))
     
-    return data #, session_set
+    return data
 
 
 def read_data(filename):
@@ -68,10 +101,12 @@ def read_data(filename):
     Returns:
         DataFrame with the data
     """
+    print('reading data file', filename)
     try:
         df = pd.read_csv(filename,
                          sep=',',
                          header=None)
+        print(f'{len(df.columns)} columns found')
         if len(df.columns) == 23:
             df.columns = [
                 'time', 'raw_1', 'raw_2', 'raw_3', 'raw_4', 'raw_5', 'raw_6',
@@ -127,14 +162,16 @@ def convert_to_pressure(data, regression_coefficients):
         param data: DataFrame with the data
         param regression_coefficients: Coefficients of the pressure regression
     """
-    pressure_data = data.iloc[:, 1:15] * regression_coefficients
+    pressure_data = data[['raw_1', 'raw_2', 'raw_3', 'raw_4', 'raw_5', 'raw_6',
+                'raw_7', 'raw_8', 'raw_9', 'raw_10', 'raw_11', 'raw_12',
+                'raw_13', 'raw_14']] * regression_coefficients
     for col in data.columns:
-        if col in ['time', 'acc_x', 'acc_y', 'acc_z', 'gyro_x', 'gyro_y', 'gyro_z']:
+        if col in ['time', 'acc_x', 'acc_y', 'acc_z', 'gyro_x', 'gyro_y', 'gyro_z', 'Timestamp']:
             pressure_data[col] = data[col]
-            continue
+            
     return pressure_data
 
-def convert_signal(data, type: str):
+def convert_signal(data, type):
     if type == "acc":
         x = data[['acc_x', 'acc_y', 'acc_z']]
         # data = data.iloc[:, 14:17]
@@ -156,7 +193,7 @@ def convert_signal(data, type: str):
         return x
 
     if type == "pressure":
-        data = data[['raw_1', 'raw_2', 'raw_3', 'raw_4', 'raw_5', 'raw_6',
+        x = data[['raw_1', 'raw_2', 'raw_3', 'raw_4', 'raw_5', 'raw_6',
                 'raw_7', 'raw_8', 'raw_9', 'raw_10', 'raw_11', 'raw_12',
                 'raw_13', 'raw_14']]
         return x.mean(axis=1)

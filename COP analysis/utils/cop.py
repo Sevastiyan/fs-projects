@@ -1,4 +1,3 @@
-from turtle import left
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -18,8 +17,12 @@ class CenterOfPressure:
             positions: Dictionary with left and right sensor positions { left: {[x], [y]}, right: {[x], [y]} }
             drop_sensors: Array [[left sensors], [right sensors]]
         """
-        self.left_data = data[0].iloc[:, 1:15]  # Left side data
-        self.right_data = data[1].iloc[:, 1:15]  # Right side data
+        self.left_data = data[0][['raw_1', 'raw_2', 'raw_3', 'raw_4', 'raw_5', 'raw_6',
+                'raw_7', 'raw_8', 'raw_9', 'raw_10', 'raw_11', 'raw_12',
+                'raw_13', 'raw_14']]  # Left side data
+        self.right_data = data[1][['raw_1', 'raw_2', 'raw_3', 'raw_4', 'raw_5', 'raw_6',
+                'raw_7', 'raw_8', 'raw_9', 'raw_10', 'raw_11', 'raw_12',
+                'raw_13', 'raw_14']]  # Right side data
 
         # self.left_data.values[self.left_data < 20] = 0    # Set all the values below 20 to 0
         # self.right_data.values[self.right_data < 20] = 0  # Set all the values below 20 to 0
@@ -29,41 +32,41 @@ class CenterOfPressure:
         else:
             self.positions = positions
 
-        if drop_sensors is None:
-            self.drop_columns = []
-            # self.offset = 0
-        else:
-            # drop = [[1,2,3,4,5,7,8,9],
-            #         [5,6,7,2,1,3,9,10]]
-            self.drop_columns = drop_sensors
-            idx = [
-                [False if i in drop_sensors[0] else True for i in range(14)],
-                [False if i in drop_sensors[1] else True for i in range(14)],
-            ]
+        # if drop_sensors is None:
+        #     self.drop_columns = []
+        #     # self.offset = 0
+        # else:
+        #     # drop = [[1,2,3,4,5,7,8,9],
+        #     #         [5,6,7,2,1,3,9,10]]
+        #     self.drop_columns = drop_sensors
+        #     idx = [
+        #         [False if i in drop_sensors[0] else True for i in range(14)],
+        #         [False if i in drop_sensors[1] else True for i in range(14)],
+        #     ]
 
-            # drop positions:
-            # d_c = self.drop_columns[0] + [x + 14 for x in self.drop_columns[1]]
-            # self.x_pos = [x for i, x in enumerate(self.x_pos) if i not in d_c]
-            # self.y_pos = [y for i, y in enumerate(self.y_pos) if i not in d_c]
-            self.positions = {
-                "left": {
-                    "x": positions["left"]["x"][idx[0]],
-                    "y": positions["left"]["y"][idx[0]],
-                },
-                "right": {
-                    "x": positions["right"]["x"][idx[1]],
-                    "y": positions["right"]["y"][idx[1]],
-                },
-            }
+        #     # drop positions:
+        #     # d_c = self.drop_columns[0] + [x + 14 for x in self.drop_columns[1]]
+        #     # self.x_pos = [x for i, x in enumerate(self.x_pos) if i not in d_c]
+        #     # self.y_pos = [y for i, y in enumerate(self.y_pos) if i not in d_c]
+        #     self.positions = {
+        #         "left": {
+        #             "x": positions["left"]["x"][idx[0]],
+        #             "y": positions["left"]["y"][idx[0]],
+        #         },
+        #         "right": {
+        #             "x": positions["right"]["x"][idx[1]],
+        #             "y": positions["right"]["y"][idx[1]],
+        #         },
+        #     }
 
-            # drop data
-            self.left_data = self.left_data.drop(
-                self.left_data.columns[drop_sensors[0]], axis=1
-            )
-            self.right_data = self.right_data.drop(
-                self.right_data.columns[drop_sensors[1]], axis=1
-            )
-            # self.offset = len(self.drop_columns[0])
+        #     # drop data
+        #     self.left_data = self.left_data.drop(
+        #         self.left_data.columns[drop_sensors[0]], axis=1
+        #     )
+        #     self.right_data = self.right_data.drop(
+        #         self.right_data.columns[drop_sensors[1]], axis=1
+        #     )
+        #     # self.offset = len(self.drop_columns[0])
 
     # Data ---------------------------------------------------------------------------------------------
     def normalise(self):
@@ -123,7 +126,7 @@ class CenterOfPressure:
     def plot_foot(self, side):
         data = self.get_cop_foot(side)  # Get the COP data for the foot
         plt.figure(figsize=(4, 4))  # Set the size of the graph
-        plt.plot(data[0], data[1])  # Plot the COP
+        plt.plot(data[0], data[1], '.')  # Plot the COP
         plt.plot(self.positions[side]['x'], self.positions[side]['y'], "ro")  # Plot the markers
         if side == "left":  # Set the boundry of the foot
             plt.xlim(-200, 0)
