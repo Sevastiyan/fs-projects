@@ -1,0 +1,13 @@
+,File,Date,Total_Activity_Time_minutes,Avg_Step_Time,Avg_Stride_Time,Avg_Cycle_Time,Avg_COP_Velocity,COP_Variability
+0,./COP analysis/data/mci007\2023-07-20 One Minute Test\S1_20230720_rawDataRight_FQYZttSuCR.txt,2023-07-20,0.0,0.0,0.0,0.0,0.0,0.0
+1,./COP analysis/data/mci007\2023-07-20 One Minute Test\S2_20230720_rawDataRight_FQYZttSuCR.txt,2023-07-20,0.38833333333333336,1.0166666666666668,2.375,4.066666666666666,33.870203361219716,35.933386677706565
+2,./COP analysis/data/mci007\2023-07-20 One Minute Test\S3_20230720_rawDataRight_FQYZttSuCR.txt,2023-07-20,1.4491666666666667,0.6544642857142858,0.6901785714285715,1.3446428571428573,84.28184695279916,66.89017844764722
+3,./COP analysis/data/mci007\2023-07-20 One Minute Test\S4_20230720_rawDataRight_FQYZttSuCR.txt,2023-07-20,1.1175,0.664423076923077,0.5932692307692308,1.2303921568627452,76.29713647781462,72.84361754462438
+4,./COP analysis/data/mci007\2023-07-20 One Minute Test\S5_20230720_rawDataRight_FQYZttSuCR.txt,2023-07-20,0.0,0.0,0.0,0.0,0.0,0.0
+5,./COP analysis/data/mci007\2023-07-21 No Data\S13_20230721_rawDataRight_FQYZttSuCR.txt,2023-07-21,0.0,0.0,0.0,0.0,0.0,0.0
+6,./COP analysis/data/mci007\2023-07-21 No Data\S15_20230721_rawDataRight_FQYZttSuCR.txt,2023-07-21,0.0,0.0,0.0,0.0,0.0,0.0
+7,./COP analysis/data/mci007\2023-07-21 No Data\S16_20230721_rawDataRight_FQYZttSuCR.txt,2023-07-21,0.0,0.0,0.0,0.0,0.0,0.0
+8,./COP analysis/data/mci007\2023-07-21 No Data\S17_20230721_rawDataRight_FQYZttSuCR.txt,2023-07-21,0.0,0.0,0.0,0.0,0.0,0.0
+9,./COP analysis/data/mci007\2023-07-21 No Data\S19_20230721_rawDataRight_FQYZttSuCR.txt,2023-07-21,0.0,0.0,0.0,0.0,0.0,0.0
+10,./COP analysis/data/mci007\2023-07-24 No Data\S21_20230724_rawDataRight_FQYZttSuCR.txt,2023-07-24,0.0,0.0,0.0,0.0,0.0,0.0
+11,./COP analysis/data/mci007\2023-08-03\S23_20230803_rawDataRight_FQYZttSuCR.txt,2023-08-03,0.0,0.0,0.0,0.0,0.0,0.0
