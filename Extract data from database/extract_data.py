@@ -8,12 +8,13 @@ import requests
 def main(): 
     print('Script Start')
     print('------------')
-    root_file = '2023-07-10 mci004'
-    root_folder = '.' #'./Extract data from database'
+    subject = 'mci004'
+    root_file = f'2023-08-02 {subject}'
+    root_folder = './Extract data from database'
     date = root_file.split(' ')[0]
 
     print('Creating JSON file...')
-    json_file = make_json(f'{root_folder}/csv/{root_file}.csv', f'{root_folder}/json/{root_file}.json')
+    json_file = make_json(f'{root_folder}/csv/{subject}/{root_file}.csv', f'{root_folder}/json/{subject}', root_file)
     data = read_json(json_file)
 
     urls = []
@@ -21,7 +22,7 @@ def main():
         urls.append(d['rawDataLeft']['url']) 
         urls.append(d['rawDataRight']['url'])
 
-    download_path = f'{root_folder}/download/{date}/{root_file}/'
+    download_path = f'{root_folder}/download/{subject}/{date}/'
     download_files(urls, download_path)
     rename_files(download_path)
 
@@ -58,11 +59,13 @@ def download_files(url_list, download_path):
     return
 
 
-def make_json(csvFilePath: str, jsonFilePath: str) -> str:
+def make_json(csvFilePath: str, jsonFilePath: str, filename: str) -> str:
     # create a dictionary
     data = {}
     # Open a csv reader called DictReader
-    
+    if not os.path.isdir(jsonFilePath):
+        os.makedirs(jsonFilePath)
+        
     with open(csvFilePath, encoding='utf-8') as csvf:
         csvReader = csv.DictReader(csvf)
         # Convert each row into a dictionary
@@ -76,10 +79,11 @@ def make_json(csvFilePath: str, jsonFilePath: str) -> str:
             data[key]['rawDataRight'] = json.loads(rows['rawDataRight'])
     # Open a json writer, and use the json.dumps()
     # function to dump data
-    with open(jsonFilePath, 'w', encoding='utf-8') as jsonf:
+
+    with open(f'{jsonFilePath}/{filename}.json', 'w', encoding='utf-8') as jsonf:
         jsonf.write(json.dumps(data, indent=4))
     
-    return jsonFilePath
+    return f'{jsonFilePath}/{filename}.json'
 
 
 def read_json(jsonFilePath):
