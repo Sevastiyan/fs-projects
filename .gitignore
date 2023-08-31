@@ -2,6 +2,7 @@
 *.zip
 *.png
 
+
 data archive october to december
 
 results/
@@ -10,3 +11,4 @@ csv/
 json/
 data/
 archive/
+plots/
