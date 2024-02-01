@@ -23,7 +23,7 @@ There are two projects that deal with classificaiton of STF incidents.
 
 Each is optimised to perform a training on a model stored in `models/`. `TS_CNN.py` is currently the most recent model, other models need to be updated and adjusted to be trained and do inference. Inside the file there are two architectures optimised to the current data supplied as input. 
 
-## Data Perparation
+## Data Preparation
 
 After using the [Slicer UI](https://github.com/Sevastiyan/fs-projects/tree/main/Slicer%20UI) to create the processed training (*and/or validation*) data, copy the files to the `stf_main/data` folder. The data needs to be separated depending on the model that will be trained. Multiclass training needs to be separated into `multiclass/Slip`, `multiclass/Trip` folders. 
 
