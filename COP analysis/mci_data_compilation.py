@@ -4,14 +4,14 @@ from utils.data_loader import load_file, convert_signal
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import re
 from scipy.signal import find_peaks
 
 
 # -------------- root variables for folders and file location - -------------- #
 root_folder = "./COP analysis"
-# date = '2023-07-10'
-subject = "mci005"
-plots_path = "./plots"
+subject = "mci010"
+
 
 left_data_list = []
 right_data_list = []
@@ -29,17 +29,13 @@ def main():
             files[day].append(os.path.join(root, day, file))
 
     for date in files.keys():
-        # for file_set in range(0, len(files[date]), 2):
-        # file_left = files[date][file_set]
-        # file_right = files[date][file_set + 1]
-        # print(file_left, file_right)
         print(f"--- Starting analysis for {date} ---")
         start_analysis(files[date], date)
 
     # Create pandas DataFrames for left and right sides
     left_df = pd.DataFrame(left_data_list)
     right_df = pd.DataFrame(right_data_list)
-    print(left_df.head(10))
+    print(left_df.head(15))
 
     right_df.to_csv(f"{subject}_right_df.csv")
     left_df.to_csv(f"{subject}_left_df.csv")
@@ -51,15 +47,16 @@ def start_analysis(data, date):
     acc = {}
     mask = {}
     gait_speed = {
-        'left': [],
-        'right': [],
+        "left": [],
+        "right": [],
     }
 
     for file_set in range(0, len(data), 2):
         # Data load
         file_left = data[file_set]
         file_right = data[file_set + 1]
-
+        match = re.search(r"S(\d+)_", file_left)
+        session = match.group(1)
         left_data = load_file(file_left, filter=True, cutoff=2)
         right_data = load_file(file_right, filter=True, cutoff=2)
 
@@ -76,15 +73,17 @@ def start_analysis(data, date):
         acc[side] = convert_signal(right_data, "acc_total")
         mask[side] = generate_mask(acc[side])
 
+        activity_input_left = left_data[mask["left"]].reset_index()
+        activity_input_right = left_data[mask["left"]].reset_index()
+
         # ---------------------- Check if the activity is enough --------------------- #
-        if len(mask['left']) < 0.75 * 60 * 20 or len(mask['right']) < 0.75 * 60 * 20:
-            left_data_list.append(generate_dummy(file_left, date.split(" ")[0]))
-            right_data_list.append(generate_dummy(file_right, date.split(" ")[0]))
+        if len(activity_input_left) * 0.05 / 60 < 2 or len(activity_input_right) * 0.05 / 60 < 2:  #! Check if this works
+            print("length of data", len(mask["left"]), len(mask["right"]))
+            left_data_list.append(generate_dummy(file_left, date.split(" ")[0], session))
+            right_data_list.append(generate_dummy(file_right, date.split(" ")[0], session))
             continue
 
         # ------------------------------- Peak Finding ------------------------------- #
-        activity_input_left = left_data[mask["left"]].reset_index()
-        activity_input_right = left_data[mask["left"]].reset_index()
 
         activity_input_right = right_data[mask["right"]].reset_index()
         filt_c = Cop.CenterOfPressure([activity_input_left, activity_input_right])
@@ -93,7 +92,7 @@ def start_analysis(data, date):
         peaks = {}
 
         prom = 10
-        dist = 18
+        dist = 14
 
         side = "left"
         cop[side] = filt_c.get_cop_foot(side)
@@ -116,52 +115,44 @@ def start_analysis(data, date):
         # ---------------------------------- Results --------------------------------- #
 
         side = "left"
-        l_timings, l_pairs = gait_timings(
-            peaks[side]["positive"], peaks[side]["negative"]
-        )
+        l_timings, l_pairs = gait_timings(peaks[side]["positive"], peaks[side]["negative"])
         l_velocity = find_cop_velocity(xl, l_timings["step"], l_pairs["step"])
-        gait_speed[side] = (
-            calculate_gait_speed(
-                l_timings, l_pairs, acc[side][mask[side]].reset_index().iloc[:, 1]
-            ),
-        )
+        gait_speed[side] = calculate_gait_speed(l_timings, l_pairs, acc[side][mask[side]].reset_index().iloc[:, 1])
         # Create dictionaries for left and right sides
+        cadence = len(peaks[side]["positive"]) / (len(activity_input_left) * 0.05 / 60) * 2  # ? *2 for both feet
         left_data = {
             # 'File': file_left,
-            'Date': date.split(" ")[0],
+            "Date": date.split(" ")[0],
+            "Session": session,
             "Total_Activity_Time_minutes": len(activity_input_left) * 0.05 / 60,
             "Avg_Step_Time": np.mean(l_timings["step"]),
             "Avg_Swing_Time": np.mean(l_timings["swing"]),
             "Avg_Stride_Time": np.mean(l_timings["stride"]),
+            "Avg_Cadence": cadence,
             "Step_Time_Variability": np.std(l_timings["step"]),
             "Stride_Time_Variability": np.std(l_timings["stride"]),
-            'COP_Variability': np.std(cop[side]),
-            "Avg_COP_Speed": np.mean(l_velocity),
-            'Avg_Gait_Speed': np.mean(gait_speed[side]),
+            "Avg_COP_Speed": np.median(l_velocity) * 2.5 / 100,
+            # "Avg_Gait_Speed": np.median(gait_speed[side]),
         }
 
         side = "right"
-        r_timings, r_pairs = gait_timings(
-            peaks[side]["positive"], peaks[side]["negative"]
-        )
-        gait_speed[side] = (
-            calculate_gait_speed(
-                r_timings, r_pairs, acc[side][mask[side]].reset_index().iloc[:, 1]
-            ),
-        )
+        r_timings, r_pairs = gait_timings(peaks[side]["positive"], peaks[side]["negative"])
+        gait_speed[side] = calculate_gait_speed(r_timings, r_pairs, acc[side][mask[side]].reset_index().iloc[:, 1])
         r_velocity = find_cop_velocity(xr, r_timings["step"], r_pairs["step"])
+        cadence = len(peaks[side]["positive"]) / (len(activity_input_right) * 0.05 / 60) * 2  # ? *2 for both feet
         right_data = {
             # 'File': file_right,
             "Date": date.split(" ")[0],
+            "Session": session,
             "Total_Activity_Time_minutes": len(activity_input_right) * 0.05 / 60,
             "Avg_Step_Time": np.mean(r_timings["step"]),
             "Avg_Swing_Time": np.mean(r_timings["swing"]),
             "Avg_Stride_Time": np.mean(r_timings["stride"]),
+            "Avg_Cadence": cadence,
             "Step_Time_Variability": np.std(r_timings["step"]),
             "Stride_Time_Variability": np.std(r_timings["stride"]),
-            'COP_Variability': np.std(cop[side]),
-            "Avg_COP_Speed": np.mean(r_velocity),
-            'Avg_Gait_Speed': np.mean(gait_speed[side]),
+            "Avg_COP_Speed": np.median(r_velocity) * 2.5 / 100,  #! Median vs mean | Also Keep in mind the 2.5 multiplier
+            # "Avg_Gait_Speed": np.median(gait_speed[side]),
         }
 
         # step_rhythm, stride_rhythm = find_rhythm(l_timings, r_timings)
@@ -220,29 +211,29 @@ def generate_mask(signal, threshold=7):
 
 
 def gait_timings(positive, negative):
-    pairs = {'step': [], 'swing': [], 'stride': []}
-    timings = {'step': [], 'swing': [], 'stride': []}
+    pairs = {"step": [], "swing": [], "stride": []}
+    timings = {"step": [], "swing": [], "stride": []}
 
     for n in negative:
         for p in positive:
             if n < p:
                 time = abs(p - n)
-                pairs['step'].append((n, p))
-                timings['step'].append(time * 0.05)
+                pairs["step"].append((n, p))
+                timings["step"].append(time * 0.05)
                 break
 
     for p in positive:
         for n in negative:
             if n > p:
                 time = abs(n - p)
-                pairs['swing'].append((p, n))
-                timings['swing'].append(time * 0.05)
+                pairs["swing"].append((p, n))
+                timings["swing"].append(time * 0.05)
                 break
 
     for i in range(len(negative) - 1):
         time = abs(negative[i] - negative[i + 1])
-        pairs['stride'].append((negative[i], negative[i + 1]))
-        timings['stride'].append(time * 0.05)
+        pairs["stride"].append((negative[i], negative[i + 1]))
+        timings["stride"].append(time * 0.05)
 
     return timings, pairs
 
@@ -259,19 +250,22 @@ def find_cop_velocity(data, time, peaks):
 
 def calculate_gait_speed(timings, pairs, acc_data=[]):
     gait_velocities = []
-    for i in range(len(pairs['stride'])):
-        start_idx, end_idx = pairs['stride'][i]
-        acc_window = acc_data[
-            start_idx:end_idx
-        ]  # Extract acceleration data within the window
+    print("gait Speed Data Input", len(timings), len(pairs))
+    for i in range(len(pairs["stride"])):
+        start_idx, end_idx = pairs["stride"][i]
+        acc_window = acc_data[start_idx:end_idx]  # Extract acceleration data within the window
 
-        time_steps = timings['stride'][i] / len(acc_window)  # Calculate time step
+        time_steps = timings["stride"][i] / len(acc_window)  # Calculate time step
 
         # Numerical integration using trapezoidal rule
+        velocity = abs(np.diff(acc_window))
+        sum_velocity = np.cumsum(velocity)
+        mean_velocity = np.mean(velocity)
+        # integrated_velocity = np.trapz(acc_window, dx=0.05)
         integrated_velocity = np.trapz(acc_window, dx=0.05)
-
         gait_velocities.append(integrated_velocity)
 
+    print(len(gait_velocities))
     return gait_velocities
 
 
@@ -283,12 +277,8 @@ def get_cov(array):
 
 
 def find_rhythm(l_timings, r_timings):
-    step_time_acf = np.correlate(
-        l_timings["step"], r_timings["step"], mode="full"
-    )  # acf - Auto Correlation Function
-    stride_time_acf = np.correlate(
-        l_timings["stride"], r_timings["stride"], mode="full"
-    )  # acf - Auto Correlation Function
+    step_time_acf = np.correlate(l_timings["step"], r_timings["step"], mode="full")  # acf - Auto Correlation Function
+    stride_time_acf = np.correlate(l_timings["stride"], r_timings["stride"], mode="full")  # acf - Auto Correlation Function
     step_time_acf = step_time_acf / np.max(step_time_acf)
     stride_time_acf = stride_time_acf / np.max(stride_time_acf)
     step_time_rhythm = step_time_acf[len(step_time_acf) // 2]
@@ -296,10 +286,11 @@ def find_rhythm(l_timings, r_timings):
     return step_time_rhythm, stride_time_rhythm
 
 
-def generate_dummy(file, date):
+def generate_dummy(file, date, session):
     return {
         # 'File': file,
         "Date": date,
+        "Session": session,
     }
 
 
