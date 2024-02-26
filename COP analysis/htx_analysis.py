@@ -10,7 +10,7 @@ from scipy.signal import find_peaks
 
 # -------------- root variables for folders and file location - -------------- #
 root_folder = "./COP analysis"
-subject = "mci010"
+subject = "htx"
 
 
 left_data_list = []
@@ -77,7 +77,7 @@ def start_analysis(data, date):
         activity_input_right = left_data[mask["left"]].reset_index()
 
         # ---------------------- Check if the activity is enough --------------------- #
-        if len(activity_input_left) * 0.05 / 60 < 2 or len(activity_input_right) * 0.05 / 60 < 2:  #! Check if this works
+        if len(activity_input_left) * 0.05 / 60 < 0.5 or len(activity_input_right) * 0.05 / 60 < 0.5:  #! Check if this works
             print("length of data", len(mask["left"]), len(mask["right"]))
             left_data_list.append(generate_dummy(file_left, date.split(" ")[0], session))
             right_data_list.append(generate_dummy(file_right, date.split(" ")[0], session))
@@ -91,8 +91,8 @@ def start_analysis(data, date):
         cop = {}
         peaks = {}
 
-        prom = 10
-        dist = 14
+        prom = 8
+        dist = 8
 
         side = "left"
         cop[side] = filt_c.get_cop_foot(side)
@@ -128,6 +128,7 @@ def start_analysis(data, date):
             "Avg_Step_Time": np.mean(l_timings["step"]),
             "Avg_Swing_Time": np.mean(l_timings["swing"]),
             "Avg_Stride_Time": np.mean(l_timings["stride"]),
+            "Total_Steps": len(peaks[side]["positive"]) * 2,
             "Avg_Cadence": cadence,
             "Step_Time_Variability": np.std(l_timings["step"]),
             "Stride_Time_Variability": np.std(l_timings["stride"]),
@@ -148,6 +149,7 @@ def start_analysis(data, date):
             "Avg_Step_Time": np.mean(r_timings["step"]),
             "Avg_Swing_Time": np.mean(r_timings["swing"]),
             "Avg_Stride_Time": np.mean(r_timings["stride"]),
+            "Total_Steps": len(peaks[side]["positive"]) * 2,
             "Avg_Cadence": cadence,
             "Step_Time_Variability": np.std(r_timings["step"]),
             "Stride_Time_Variability": np.std(r_timings["stride"]),

@@ -10,8 +10,8 @@ import requests
 def main():
     print("Script Start")
     print("------------")
-    subject = "mci010"
-    root_file = f"2024-01-29 {subject}"
+    subject = "mci003"
+    root_file = f"2024-02-23 {subject}"
     root_folder = "./Extract data from database"
     date = root_file.split(" ")[0]
 

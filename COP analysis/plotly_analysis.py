@@ -10,12 +10,16 @@ import plotly.graph_objects as go
 
 # ----------------------------- Global Variables ----------------------------- #
 root_folder = "./COP analysis"
-subject = "mci010"
+subject = "mci008"
 # When using peak detection these two variables are importan. https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html
 prom = 10
-dist = 16
+dist = 12
 
-dates_to_include = ["2024-01-29"]
+dates_to_include = [
+    "2024-02-15",
+    "2024-02-20",
+    "2024-02-23",
+]
 
 files = {}
 subplot_titles = {}

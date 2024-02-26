@@ -1,0 +1,10 @@
+
+| Subject | Phone                | Issues                                                                                                                       | Dates                                                               |
+| :------ | :------------------- | :--------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------ |
+| MCI 001 | phone 11             | -----                                                                                                                        | Jan 15, 24, 25, 26, <br/> Feb 01, 05, 06                            |
+| MCI 003 | phone 19             | No IMU activity for the first 2 days. Feb 15 has good activity                                                               | Feb 13, 14, 15                                                      |
+| MCI 008 | phone 15             | -----                                                                                                                        | Jan 28, 29, 30, <br/> Feb 01, 03, 05, 06, 07, 08, 10, 11, 12        |
+| MCI 009 | phone 16             | No IMU activity recorded since Feb 07, <br/> but there seems to be a silent evidence of walking                              | Feb 05, 06, 07, 08, 09, 13, 14, 15                                  |
+| MCI 010 | tangtop (Taken Back) | Good data, right foot registers significantly lower pressures than the left.                                                 | Jan 17, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29 <br/> Feb 01, 04, 06 |
+| MCI 011 | phone 08             | Good data since replacement on Jan 29. <br/> A slight issue since Feb 05 with left foot. Right foot                          | Jan 15, 17, 19, 20, 22, 27, 29, 31, <br/> Feb 01, 04, 05, 06, 07    |
+| MCI 012 | phone 18             | Insoles look good since replacement on Jan 29. <br/> After that, sessions lo longer than 2 minutes and no activity detected. | Jan 15, 17, 19, 20, 22, 27, 29, 31, <br/> Feb 01                    |
