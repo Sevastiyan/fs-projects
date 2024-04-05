@@ -10,28 +10,32 @@ import requests
 def main():
     print("Script Start")
     print("------------")
-    subject = "mci003"
-    root_file = f"2024-02-23 {subject}"
+    subject = "htx03"
+    dates = [
+        "2024-04-05",
+    ]
     root_folder = "./Extract data from database"
-    date = root_file.split(" ")[0]
+    # date = root_file.split(" ")[0]
 
-    print("Creating JSON file...")
-    json_file = make_json(
-        f"{root_folder}/csv/{subject}/{root_file}.csv",
-        f"{root_folder}/json/{subject}",
-        root_file,
-    )
-    data = read_json(json_file)
+    for date in dates:
+        print("Creating JSON file...")
+        root_file = f"{date} {subject}"
+        json_file = make_json(
+            f"{root_folder}/csv/{subject}/{root_file}.csv",
+            f"{root_folder}/json/{subject}",
+            root_file,
+        )
+        data = read_json(json_file)
 
-    urls = []
-    for d in data.values():
-        urls.append(d["rawDataLeft"]["url"])
-        urls.append(d["rawDataRight"]["url"])
+        urls = []
+        for d in data.values():
+            urls.append(d["rawDataLeft"]["url"])
+            urls.append(d["rawDataRight"]["url"])
 
-    download_path = f"COP analysis/data/{subject}/{date}/"  #! Downloads the data to COP analysis folder Depending on environment use abspath to navigate
-    print("Downloading files to:", os.path.abspath(download_path))
-    download_files(urls, download_path)
-    rename_files(download_path)
+        download_path = f"COP analysis/data/{subject}/{date}/"  #! Downloads the data to COP analysis folder Depending on environment use abspath to navigate
+        print("Downloading files to:", os.path.abspath(download_path))
+        download_files(urls, download_path)
+        rename_files(download_path)
 
 
 def download_files(url_list, download_path):

@@ -62,41 +62,14 @@ class CenterOfPressure:
         else:
             self.positions = positions
 
-        # if drop_sensors is None:
-        #     self.drop_columns = []
-        #     # self.offset = 0
-        # else:
-        #     # drop = [[1,2,3,4,5,7,8,9],
-        #     #         [5,6,7,2,1,3,9,10]]
-        #     self.drop_columns = drop_sensors
-        #     idx = [
-        #         [False if i in drop_sensors[0] else True for i in range(14)],
-        #         [False if i in drop_sensors[1] else True for i in range(14)],
-        #     ]
+        if drop_sensors:
+            self.left_data.drop(columns=[f"raw_{s}" for s in drop_sensors[0]], inplace=True)
+            self.right_data.drop(columns=[f"raw_{s}" for s in drop_sensors[1]], inplace=True)
 
-        #     # drop positions:
-        #     # d_c = self.drop_columns[0] + [x + 14 for x in self.drop_columns[1]]
-        #     # self.x_pos = [x for i, x in enumerate(self.x_pos) if i not in d_c]
-        #     # self.y_pos = [y for i, y in enumerate(self.y_pos) if i not in d_c]
-        #     self.positions = {
-        #         "left": {
-        #             "x": positions["left"]["x"][idx[0]],
-        #             "y": positions["left"]["y"][idx[0]],
-        #         },
-        #         "right": {
-        #             "x": positions["right"]["x"][idx[1]],
-        #             "y": positions["right"]["y"][idx[1]],
-        #         },
-        #     }
-
-        #     # drop data
-        #     self.left_data = self.left_data.drop(
-        #         self.left_data.columns[drop_sensors[0]], axis=1
-        #     )
-        #     self.right_data = self.right_data.drop(
-        #         self.right_data.columns[drop_sensors[1]], axis=1
-        #     )
-        #     # self.offset = len(self.drop_columns[0])
+            for side, sensors in zip(["left", "right"], drop_sensors):
+                for sensor in sensors:
+                    self.positions[side]["x"] = np.delete(self.positions[side]["x"], sensor - 1)
+                    self.positions[side]["y"] = np.delete(self.positions[side]["y"], sensor - 1)
 
     # Data ---------------------------------------------------------------------------------------------
     def normalise(self):

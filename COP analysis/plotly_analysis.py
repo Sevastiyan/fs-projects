@@ -10,15 +10,13 @@ import plotly.graph_objects as go
 
 # ----------------------------- Global Variables ----------------------------- #
 root_folder = "./COP analysis"
-subject = "mci008"
+subject = "htx03"
 # When using peak detection these two variables are importan. https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html
 prom = 10
-dist = 12
+dist = 14
 
 dates_to_include = [
-    "2024-02-15",
-    "2024-02-20",
-    "2024-02-23",
+    "2024-04-05",
 ]
 
 files = {}
@@ -74,7 +72,7 @@ def main():
             raw_left = load_file(data[i], filter=False)
             raw_right = load_file(data[i + 1], filter=False)
 
-            if len(raw_left) < 2 / 0.05 or len(raw_right) < 2 / 0.05:
+            if len(raw_left) < 2 / 0.01 or len(raw_right) < 2 / 0.01:
                 print(f"Session {data[i] or data[i + 1]} less than 2 seconds, Skip")
                 print("-----------------------------------------------------------")
                 continue
@@ -84,7 +82,7 @@ def main():
 
             # --------------------------------- Left Side -------------------------------- #
             side = "left"
-            time[side] = [x * 0.05 for x in range(len(raw_left))]
+            time[side] = [x * 0.01 for x in range(len(raw_left))]
             raw_signal[side] = convert_signal(raw_left, "pressure")
             filt_signal[side] = convert_signal(filter_left, "pressure")
             acc[side] = convert_signal(filter_left, "acc_total")
@@ -133,7 +131,7 @@ def main():
 
             # -------------------------------- Right Side -------------------------------- #
             side = "right"
-            time[side] = [x * 0.05 for x in range(len(raw_right))]
+            time[side] = [x * 0.01 for x in range(len(raw_right))]
             raw_signal[side] = convert_signal(raw_right, "pressure")
             filt_signal[side] = convert_signal(filter_right, "pressure")
             acc[side] = convert_signal(filter_right, "acc_total")
@@ -201,7 +199,7 @@ def main():
 
             side = "left"
             cop[side] = c.get_cop_foot(side)
-            time[side] = [x * 0.05 for x in range(len(cop[side][0]))]
+            time[side] = [x * 0.01 for x in range(len(cop[side][0]))]
 
             xl = cop[side][1]
             peaks[side] = {}
@@ -243,7 +241,7 @@ def main():
 
             side = "right"
             cop[side] = c.get_cop_foot(side)
-            time[side] = [x * 0.05 for x in range(len(cop[side][0]))]
+            time[side] = [x * 0.01 for x in range(len(cop[side][0]))]
 
             xr = cop[side][1]
             peaks[side] = {}
@@ -294,16 +292,17 @@ def main():
 
         fig.update_layout(title=f"{subject}: {date}")
         fig_cop.update_layout(title=f"{subject}: {date}")
-        fig.update_layout(title=date, height=row * 300, showlegend=True, yaxis_range=[-100, 100])
         fig_cop.update_layout(title=date, height=row * 300, showlegend=True, yaxis_range=[-100, 100])
+        fig_cop.update_yaxes(range=[-100, 100])
+        fig.update_layout(title=date, height=row * 300, showlegend=True, yaxis_range=[-100, 100])
         # fig.show()
         fig.write_html(f"{plots_path}/activity.html")
         fig_cop.write_html(f"{plots_path}/center_of_pressure.html")
 
 
-def generate_mask(signal, threshold=5):
+def generate_mask(signal, threshold=7):
     print("Generating Mask...")
-    freq = 0.05
+    freq = 0.01
     seconds = 3
     window = int(seconds / freq)
     active = False
