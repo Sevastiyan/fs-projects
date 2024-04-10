@@ -10,8 +10,11 @@ from scipy.signal import find_peaks
 
 # -------------- root variables for folders and file location - -------------- #
 root_folder = "./COP analysis"
-subjects = ["htx02"]
-
+subjects = ["htx01"]
+freq = 0.01
+dates_to_include = [
+    "2024-04-05",
+]
 
 left_data_list = []
 right_data_list = []
@@ -29,14 +32,15 @@ def main():
         for day in dates:
             if day.endswith(".zip"):
                 continue
-            if day.startswith("2024-04-02"):
-                files[day] = []
-                for file in os.listdir(f"{root}/{day}"):
-                    files[day].append(os.path.join(root, day, file))
+            if day not in dates_to_include:
+                continue
+            files[day] = []
+            for file in os.listdir(f"{root}/{day}"):
+                files[day].append(os.path.join(root, day, file))
 
         for date in files.keys():
             print(f"--- Starting analysis for {date} ---")
-            start_analysis(files[date], date, 0.01)
+            start_analysis(files[date], date, freq)
 
         # Create pandas DataFrames for left and right sides
         left_df = pd.DataFrame(left_data_list)

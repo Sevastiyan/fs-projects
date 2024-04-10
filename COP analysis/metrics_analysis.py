@@ -10,7 +10,7 @@ from scipy.signal import find_peaks
 
 # -------------- root variables for folders and file location - -------------- #
 root_folder = "./COP analysis"
-subjects = ["mci015"]
+subjects = ["mci013"]
 
 
 left_data_list = []
@@ -85,7 +85,7 @@ def start_analysis(data, date):
         activity_input_right = right_data[mask["right"]].reset_index()
 
         # ---------------------- Check if the activity is enough --------------------- #
-        if len(activity_input_left) * 0.05 / 60 < 2 or len(activity_input_right) * 0.05 / 60 < 2:  #! Check if this works
+        if len(activity_input_left) * 0.05 / 60 < 0.5 or len(activity_input_right) * 0.05 / 60 < 0.5:  #! Check if this works
             print("length of data", len(mask["left"]), len(mask["right"]))
             left_data_list.append(generate_dummy(file_left, date.split(" ")[0], session))
             right_data_list.append(generate_dummy(file_right, date.split(" ")[0], session))
