@@ -10,33 +10,36 @@ import requests
 def main():
     print("Script Start")
     print("------------")
-    subject = "mci011"
+    subjects = ["htx_test"]
+    # subject = "mci004"
     dates = [
-        "2024-04-06",
-        "2024-04-07",
+        "2024-04-26",
     ]
-    root_folder = "./Extract data from database"
-    # date = root_file.split(" ")[0]
+    for subject in subjects:
+        root_folder = "./Extract data from database"
+        # dates = os.listdir(f"{root_folder}/csv/{subject}")
 
-    for date in dates:
-        print("Creating JSON file...")
-        root_file = f"{date} {subject}"
-        json_file = make_json(
-            f"{root_folder}/csv/{subject}/{root_file}.csv",
-            f"{root_folder}/json/{subject}",
-            root_file,
-        )
-        data = read_json(json_file)
+        for date in dates:
+            print("Creating JSON file...")
+            date = date.split(" ")[0]
 
-        urls = []
-        for d in data.values():
-            urls.append(d["rawDataLeft"]["url"])
-            urls.append(d["rawDataRight"]["url"])
+            root_file = f"{date} {subject}"
+            json_file = make_json(
+                f"{root_folder}/csv/{subject}/{root_file}.csv",
+                f"{root_folder}/json/{subject}",
+                root_file,
+            )
+            data = read_json(json_file)
 
-        download_path = f"COP analysis/data/{subject}/{date}/"  #! Downloads the data to COP analysis folder Depending on environment use abspath to navigate
-        print("Downloading files to:", os.path.abspath(download_path))
-        download_files(urls, download_path)
-        rename_files(download_path)
+            urls = []
+            for d in data.values():
+                urls.append(d["rawDataLeft"]["url"])
+                urls.append(d["rawDataRight"]["url"])
+
+            download_path = f"MCI analysis/data/{subject}/{date}/"  #! Downloads the data to COP analysis folder Depending on environment use abspath to navigate
+            print("Downloading files to:", os.path.abspath(download_path))
+            download_files(urls, download_path)
+            rename_files(download_path)
 
 
 def download_files(url_list, download_path):

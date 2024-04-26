@@ -9,17 +9,15 @@ import plotly.graph_objects as go
 
 
 # ----------------------------- Global Variables ----------------------------- #
-root_folder = "./COP analysis"
-subject = "mci013"
+root_folder = "./MCI analysis"
+subject = "htx_test"
 freq = 0.01
 # When using peak detection these two variables are important. https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html
 prom = 10
 dist = 14
 
 dates_to_include = [
-    "2024-03-29",
-    "2024-03-30",
-    "2024-03-31",
+    "2024-04-26",
 ]
 
 files = {}
