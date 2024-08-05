@@ -17,12 +17,42 @@ class CenterOfPressure:
             positions: Dictionary with left and right sensor positions { left: {[x], [y]}, right: {[x], [y]} }
             drop_sensors: Array [[left sensors], [right sensors]]
         """
-        self.left_data = data[0][['raw_1', 'raw_2', 'raw_3', 'raw_4', 'raw_5', 'raw_6',
-                'raw_7', 'raw_8', 'raw_9', 'raw_10', 'raw_11', 'raw_12',
-                'raw_13', 'raw_14']]  # Left side data
-        self.right_data = data[1][['raw_1', 'raw_2', 'raw_3', 'raw_4', 'raw_5', 'raw_6',
-                'raw_7', 'raw_8', 'raw_9', 'raw_10', 'raw_11', 'raw_12',
-                'raw_13', 'raw_14']]  # Right side data
+        self.left_data = data[0][
+            [
+                "raw_1",
+                "raw_2",
+                "raw_3",
+                "raw_4",
+                "raw_5",
+                "raw_6",
+                "raw_7",
+                "raw_8",
+                "raw_9",
+                "raw_10",
+                "raw_11",
+                "raw_12",
+                "raw_13",
+                "raw_14",
+            ]
+        ]  # Left side data
+        self.right_data = data[1][
+            [
+                "raw_1",
+                "raw_2",
+                "raw_3",
+                "raw_4",
+                "raw_5",
+                "raw_6",
+                "raw_7",
+                "raw_8",
+                "raw_9",
+                "raw_10",
+                "raw_11",
+                "raw_12",
+                "raw_13",
+                "raw_14",
+            ]
+        ]  # Right side data
 
         # self.left_data.values[self.left_data < 20] = 0    # Set all the values below 20 to 0
         # self.right_data.values[self.right_data < 20] = 0  # Set all the values below 20 to 0
@@ -32,41 +62,14 @@ class CenterOfPressure:
         else:
             self.positions = positions
 
-        # if drop_sensors is None:
-        #     self.drop_columns = []
-        #     # self.offset = 0
-        # else:
-        #     # drop = [[1,2,3,4,5,7,8,9],
-        #     #         [5,6,7,2,1,3,9,10]]
-        #     self.drop_columns = drop_sensors
-        #     idx = [
-        #         [False if i in drop_sensors[0] else True for i in range(14)],
-        #         [False if i in drop_sensors[1] else True for i in range(14)],
-        #     ]
+        if drop_sensors:
+            self.left_data.drop(columns=[f"raw_{s}" for s in drop_sensors[0]], inplace=True)
+            self.right_data.drop(columns=[f"raw_{s}" for s in drop_sensors[1]], inplace=True)
 
-        #     # drop positions:
-        #     # d_c = self.drop_columns[0] + [x + 14 for x in self.drop_columns[1]]
-        #     # self.x_pos = [x for i, x in enumerate(self.x_pos) if i not in d_c]
-        #     # self.y_pos = [y for i, y in enumerate(self.y_pos) if i not in d_c]
-        #     self.positions = {
-        #         "left": {
-        #             "x": positions["left"]["x"][idx[0]],
-        #             "y": positions["left"]["y"][idx[0]],
-        #         },
-        #         "right": {
-        #             "x": positions["right"]["x"][idx[1]],
-        #             "y": positions["right"]["y"][idx[1]],
-        #         },
-        #     }
-
-        #     # drop data
-        #     self.left_data = self.left_data.drop(
-        #         self.left_data.columns[drop_sensors[0]], axis=1
-        #     )
-        #     self.right_data = self.right_data.drop(
-        #         self.right_data.columns[drop_sensors[1]], axis=1
-        #     )
-        #     # self.offset = len(self.drop_columns[0])
+            for side, sensors in zip(["left", "right"], drop_sensors):
+                for sensor in sensors:
+                    self.positions[side]["x"] = np.delete(self.positions[side]["x"], sensor - 1)
+                    self.positions[side]["y"] = np.delete(self.positions[side]["y"], sensor - 1)
 
     # Data ---------------------------------------------------------------------------------------------
     def normalise(self):
@@ -76,12 +79,8 @@ class CenterOfPressure:
 
     def calculate_cop_butterfly(self):
         data = pd.concat([self.left_data, self.right_data], axis=1)
-        x_pos = np.concatenate(
-            [self.positions["left"]["x"], self.positions["right"]["x"]], axis=1
-        )
-        y_pos = np.concatenate(
-            [self.positions["left"]["y"], self.positions["right"]["y"]], axis=1
-        )
+        x_pos = np.concatenate([self.positions["left"]["x"], self.positions["right"]["x"]], axis=1)
+        y_pos = np.concatenate([self.positions["left"]["y"], self.positions["right"]["y"]], axis=1)
         data_sum = data.sum(axis=1)  # Sum of all the data
         cop_x = data * x_pos  # Multiply the data with the x_pos
         cop_y = data * y_pos  # Multiply the data with the y_pos
@@ -126,8 +125,8 @@ class CenterOfPressure:
     def plot_foot(self, side):
         data = self.get_cop_foot(side)  # Get the COP data for the foot
         plt.figure(figsize=(4, 4))  # Set the size of the graph
-        plt.plot(data[0], data[1], '.')  # Plot the COP
-        plt.plot(self.positions[side]['x'], self.positions[side]['y'], "ro")  # Plot the markers
+        plt.plot(data[0], data[1], ".")  # Plot the COP
+        plt.plot(self.positions[side]["x"], self.positions[side]["y"], "ro")  # Plot the markers
         if side == "left":  # Set the boundry of the foot
             plt.xlim(-200, 0)
         else:
@@ -140,16 +139,15 @@ class CenterOfPressure:
         filename = f"_{side}_COP_{time_now}.png"  # Name of the graph
         self.save_graph(plt, filename)  # Save the graph
 
-
     def plot_both_feet(self):
-        left_x, left_y = self.get_cop_foot('left')
-        right_x, right_y = self.get_cop_foot('right')
-        
+        left_x, left_y = self.get_cop_foot("left")
+        right_x, right_y = self.get_cop_foot("right")
+
         plt.figure(figsize=(4, 4))
-        plt.plot(left_x, left_y) 
-        plt.plot(self.positions['left']['x'], self.positions['left']['y'], "ro")
+        plt.plot(left_x, left_y)
+        plt.plot(self.positions["left"]["x"], self.positions["left"]["y"], "ro")
         plt.plot(right_x, right_y)
-        plt.plot(self.positions['right']['x'], self.positions['right']['y'], "ro")
+        plt.plot(self.positions["right"]["x"], self.positions["right"]["y"], "ro")
 
         plt.title(f"Both feet COP")
         plt.xlabel("Position [mm]")
@@ -158,10 +156,8 @@ class CenterOfPressure:
         time_now = time.strftime("%Y%m%d-%H%M%S")  # Current time
         filename = f"both_COP_{time_now}.png"  # Name of the graph
         self.save_graph(plt, filename)  # Save the graph
-        
+
         pass
-
-
 
     def plot_butterfly(self, session):
         plt.figure(figsize=(5, 5))  # Set the size of the graph
@@ -176,14 +172,12 @@ class CenterOfPressure:
         filename = f"{session}_Butterfly_COP_{time_now}.png"  # Name of the graph
         self.save_graph(plt, filename)  # Save the graph
 
-
     # Save ---------------------------------------------------------------------------------------------
     def save_graph(self, graph, filename):
         path = os.path.join(".", "results", "graphs")  # Path to save the graph
         if not os.path.exists(path):  # Create the path if it doesn't exist
             os.makedirs(path)
         graph.savefig("\\".join([path, filename]))  # Save the graph
-
 
     def save_data(self, session):
         """Save the DataFrame in a csv file
@@ -264,50 +258,94 @@ class CenterOfPressure:
 
     def default_positions(self):
         return {
-        "left": {
-            "x": np.asarray(
-                [
-                    -149,
-                    -133,
-                    -115,
-                    -112,
-                    -96,
-                    -117,
-                    -101,
-                    -126,
-                    -146,
-                    -161,
-                    -140,
-                    -159,
-                    -158,
-                    -156,
-                ]
-            ),
-            "y": np.asarray(
-                [-95, -114, -92, -16, 50, 56, 97, 101, 87, 62, 55, 25, -10, -41]
-            ),
-        },
-        "right": {
-            "x": np.asarray(
-                [
-                    149,
-                    133,
-                    115,
-                    112,
-                    96,
-                    117,
-                    101,
-                    126,
-                    146,
-                    161,
-                    140,
-                    159,
-                    158,
-                    156,
-                ]
-            ),
-            "y": np.asarray(
-                [-95, -114, -92, -16, 50, 56, 97, 101, 87, 62, 55, 25, -10, -41]
-            ),
-        },
-    }
+            "left": {
+                "x": np.asarray(
+                    [
+                        -149,
+                        -133,
+                        -115,
+                        -112,
+                        -96,
+                        -117,
+                        -101,
+                        -126,
+                        -146,
+                        -161,
+                        -140,
+                        -159,
+                        -158,
+                        -156,
+                    ]
+                ),
+                "y": np.asarray([-95, -114, -92, -16, 50, 56, 97, 101, 87, 62, 55, 25, -10, -41]),
+            },
+            "right": {
+                "x": np.asarray(
+                    [
+                        149,
+                        133,
+                        115,
+                        112,
+                        96,
+                        117,
+                        101,
+                        126,
+                        146,
+                        161,
+                        140,
+                        159,
+                        158,
+                        156,
+                    ]
+                ),
+                "y": np.asarray([-95, -114, -92, -16, 50, 56, 97, 101, 87, 62, 55, 25, -10, -41]),
+            },
+        }
+        # return {
+        #     "left": {
+        #         "x": np.asarray(
+        #             [
+        #                 -15.781,
+        #                 0.151,
+        #                 16.421,
+        #                 16.257,
+        #                 32.360,
+        #                 9.439,
+        #                 25.545,
+        #                 3.566,
+        #                 -16.666,
+        #                 -15.802,
+        #                 -31.683,
+        #                 -32.360,
+        #                 -24.562,
+        #                 -21.915,
+        #             ]
+        #         ),
+        #         "y": np.asarray(
+        #             [-72.290, -103.172, -72.955, -13.299, 60.864, 63.219, 92.967, 103.172, 89.974, 54.246, 71.145, 33.512, 8.389, -18.231]
+        #         ),
+        #     },
+        #     "right": {
+        #         "x": np.asarray(
+        #             [
+        #                 15.781,
+        #                 -0.151,
+        #                 -16.421,
+        #                 -16.257,
+        #                 -32.360,
+        #                 -9.439,
+        #                 -25.545,
+        #                 -3.566,
+        #                 16.666,
+        #                 15.802,
+        #                 31.683,
+        #                 32.360,
+        #                 24.562,
+        #                 21.915,
+        #             ]
+        #         ),
+        #         "y": np.asarray(
+        #             [-72.290, -103.172, -72.955, -13.299, 60.864, 63.219, 92.967, 103.172, 89.974, 54.246, 71.145, 33.512, 8.389, -18.231]
+        #         ),
+        #     },
+        # }
