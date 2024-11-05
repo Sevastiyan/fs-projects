@@ -4,8 +4,8 @@ import os
 from datetime import datetime
 import plotly_analysis
 
-SUBJECT = "htx7"  # Change this to the subject
-GLOBAL_DATE = "2024-09-04"  # Change this for the date
+SUBJECT = "htx3"  # Change this to the subject
+GLOBAL_DATE = "2024-08-05"  # Change this for the date
 
 
 def main():

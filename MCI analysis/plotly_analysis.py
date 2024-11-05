@@ -9,8 +9,8 @@ import plotly.graph_objects as go
 
 
 # ----------------------------- Global Variables ----------------------------- #
-root_folder = "./MCI analysis"
-subject = "htx_test"
+root_folder = "./COP analysis"
+subject = "mci013"
 freq = 0.01
 # When using peak detection these two variables are important. https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html
 prom = 10
