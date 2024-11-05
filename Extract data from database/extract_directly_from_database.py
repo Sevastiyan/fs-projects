@@ -5,15 +5,13 @@ from datetime import datetime
 import plotly_analysis
 
 SUBJECT = "htx3"  # Change this to the subject
-GLOBAL_DATE = "2024-08-05" # Change this for the date
+GLOBAL_DATE = "2024-08-05"  # Change this for the date
+
 
 def main():
 
-
     # Save destination
     root_destination = f"./Extract data from database/data/{SUBJECT}/{GLOBAL_DATE}"
-
-
 
     # ---------------------------------------------------------------------------- #
     #                            REST OF CODE                                      #
@@ -48,6 +46,7 @@ def main():
         download_file(document["rawDataLeft"], "Left", root_destination, base_url, SUBJECT)
         download_file(document["rawDataRight"], "Right", root_destination, base_url, SUBJECT)
 
+
 def download_file(file, side, root_destination, base_url, subject):
     """
     Download a file from the given URL and save it to the destination path if it doesn't exist.
@@ -70,6 +69,7 @@ def download_file(file, side, root_destination, base_url, subject):
     else:
         print(f"Failed to download file from URL: {base_url + file}")
 
+
 def modify_filename(file_name, side, subject):
     """
     Modify the filename extracted from the URL.
@@ -80,6 +80,7 @@ def modify_filename(file_name, side, subject):
     date = parts[-1].split(".")[0]
     new_filename = f"{session_number}_{date}_rawData{side}_{subject}.txt"
     return new_filename
+
 
 if "__main__" == __name__:
     main()

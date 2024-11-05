@@ -21,7 +21,7 @@ def load_file(file, filter=False, regressions=None, cutoff=1.8):
             x[col] = butter_lowpass_filter(raw_data[col], cutoff=cutoff, fs=20)
             # Substitute negative signals with 0 in raw columns
             raw_columns = [col for col in x.columns if col.startswith("raw_")]
-            x[raw_columns] = x[raw_columns].clip(lower=1)
+            x[raw_columns] = x[raw_columns].clip(lower=0)
     else:
         x = raw_data
 

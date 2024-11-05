@@ -9,7 +9,7 @@ from scipy.signal import find_peaks
 import shutil
 
 root_folder = "./htx_analysis"
-subjects = ["P1", "P2", "P3", "P4", "P5", "P6"]
+subjects = ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10", "P11", "P12"]
 dates_to_include = []
 
 

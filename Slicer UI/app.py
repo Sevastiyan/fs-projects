@@ -37,14 +37,10 @@ class App(customtkinter.CTk):
         self.folder_frame = customtkinter.CTkFrame(master=self)
         self.folder_frame.grid(row=5, column=0, rowspan=2, padx=20, pady=(20, 0), sticky="ew")
 
-        self.button_slice = customtkinter.CTkButton(
-            master=self, text="Slice", fg_color="green", command=self.save_slice
-        )
+        self.button_slice = customtkinter.CTkButton(master=self, text="Slice", fg_color="green", command=self.save_slice)
         self.button_slice.grid(row=1, column=2, padx=20, pady=5, sticky="ew")
 
-        self.button_skip = customtkinter.CTkButton(
-            master=self, text="Skip", fg_color="orange", command=self.update_figure
-        )
+        self.button_skip = customtkinter.CTkButton(master=self, text="Skip", fg_color="orange", command=self.update_figure)
         self.button_skip.grid(row=2, column=2, padx=20, pady=5, sticky="ew")
 
         self.button_save = customtkinter.CTkButton(master=self, text="Save", command=self.save_file)
@@ -112,7 +108,7 @@ class App(customtkinter.CTk):
         return acc, gyro
 
     def move_slice(self, new_val):
-        x = int(len(self.t) * new_val) # convert from fraction to data where t is x axis and new_val is 
+        x = int(len(self.t) * new_val)  # convert from fraction to data where t is x axis and new_val is
         self.left_border.set_xdata(x)
         self.right_border.set_xdata(x + 200)
         self.ax2.set_xlim(x - 20, x + 220)
@@ -127,7 +123,7 @@ class App(customtkinter.CTk):
         print('Progress: ', self.index, '/', length)
 
     def save_slice(self):
-        x = int(self.slider_1.get() * len(self.t)) # convert from fraction to data where
+        x = int(self.slider_1.get() * len(self.t))  # convert from fraction to data where
         print('Slice after save', x)
         acc_slice = self.acc_signal[x : x + 200]
         if len(acc_slice) < 200:  # Padding
@@ -161,7 +157,7 @@ class App(customtkinter.CTk):
 
 def main():
     # ----- Data Load -----
-    root = 'data/2022-10/Raw Slip'
+    root = 'data/2022-10/Slip'
     file_list = []
     filenames = []
 

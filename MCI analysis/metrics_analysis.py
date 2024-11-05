@@ -12,7 +12,7 @@ from utils.filters import butter_lowpass_filter
 
 # -------------- root variables for folders and file location - -------------- #
 root_folder = "./MCI analysis"
-subjects = ["mci005"]
+subjects = ["mci015"]
 
 left_data_list = []
 right_data_list = []
@@ -24,7 +24,7 @@ def main():
         left_data_list.clear()
         right_data_list.clear()
         files = {}
-        root = f"{root_folder}/data/{subject}"
+        root = f"{root_folder}/data/mci_raw_data/{subject}"
         dates = os.listdir(root)
 
         for day in dates:
@@ -99,7 +99,7 @@ def start_analysis(data, date):
         cop = {}
         peaks = {}
 
-        prom = 10
+        prom = 4
         dist = 14
 
         side = "left"
@@ -107,6 +107,7 @@ def start_analysis(data, date):
         time[side] = [x * 0.05 for x in range(len(cop[side][0]))]
 
         xl = cop[side][1]
+        xl = butter_lowpass_filter(xl, cutoff=2, fs=20, order=3)
         peaks[side] = {}
         peaks[side]["positive"], _ = find_peaks(xl, prominence=prom, distance=dist)
         peaks[side]["negative"], _ = find_peaks(-xl, prominence=prom, distance=dist)
@@ -116,7 +117,7 @@ def start_analysis(data, date):
         time[side] = [x * 0.05 for x in range(len(cop[side][0]))]
 
         xr = cop[side][1]
-        # xr = butter_lowpass_filter(xr, cutoff=2, fs=20, order=3)
+        xr = butter_lowpass_filter(xr, cutoff=2, fs=20, order=3)
 
         peaks[side] = {}
         peaks[side]["positive"], _ = find_peaks(xr, prominence=prom, distance=dist)
