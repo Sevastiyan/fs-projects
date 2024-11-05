@@ -6,12 +6,13 @@ import pandas as pd
 import numpy as np
 import re
 from scipy.signal import find_peaks
+import matplotlib.pyplot as plt
+from utils.filters import butter_lowpass_filter
 
 
 # -------------- root variables for folders and file location - -------------- #
-root_folder = "./COP analysis"
-subjects = ["mci013"]
-
+root_folder = "./MCI analysis"
+subjects = ["mci015"]
 
 left_data_list = []
 right_data_list = []
@@ -23,7 +24,7 @@ def main():
         left_data_list.clear()
         right_data_list.clear()
         files = {}
-        root = f"{root_folder}/data/{subject}"
+        root = f"{root_folder}/data/mci_raw_data/{subject}"
         dates = os.listdir(root)
 
         for day in dates:
@@ -85,7 +86,7 @@ def start_analysis(data, date):
         activity_input_right = right_data[mask["right"]].reset_index()
 
         # ---------------------- Check if the activity is enough --------------------- #
-        if len(activity_input_left) * 0.05 / 60 < 0.5 or len(activity_input_right) * 0.05 / 60 < 0.5:  #! Check if this works
+        if len(activity_input_left) * 0.05 / 60 < 0.8 or len(activity_input_right) * 0.05 / 60 < 0.8:  #! Check if this works
             print("length of data", len(mask["left"]), len(mask["right"]))
             left_data_list.append(generate_dummy(file_left, date.split(" ")[0], session))
             right_data_list.append(generate_dummy(file_right, date.split(" ")[0], session))
@@ -98,14 +99,15 @@ def start_analysis(data, date):
         cop = {}
         peaks = {}
 
-        prom = 10
-        dist = 18
+        prom = 4
+        dist = 14
 
         side = "left"
         cop[side] = filt_c.get_cop_foot(side)
         time[side] = [x * 0.05 for x in range(len(cop[side][0]))]
 
         xl = cop[side][1]
+        xl = butter_lowpass_filter(xl, cutoff=2, fs=20, order=3)
         peaks[side] = {}
         peaks[side]["positive"], _ = find_peaks(xl, prominence=prom, distance=dist)
         peaks[side]["negative"], _ = find_peaks(-xl, prominence=prom, distance=dist)
@@ -115,9 +117,38 @@ def start_analysis(data, date):
         time[side] = [x * 0.05 for x in range(len(cop[side][0]))]
 
         xr = cop[side][1]
+        xr = butter_lowpass_filter(xr, cutoff=2, fs=20, order=3)
+
         peaks[side] = {}
         peaks[side]["positive"], _ = find_peaks(xr, prominence=prom, distance=dist)
         peaks[side]["negative"], _ = find_peaks(-xr, prominence=prom, distance=dist)
+
+        # fig, axs = plt.subplots(2, 1, figsize=(10, 7))
+
+        # # First subplot
+        # # axs[0].plot(convert_signal(nf_right, 'pressure'), label='pressure')
+        # axs[0].plot(filt_signal[side], label="filtered pressure")  # Adjust x and y accordingly
+        # # add the peaks (positive and negative)
+        # axs[0].set_xlabel("Time")
+        # axs[0].set_ylabel("Pressure")
+        # axs[0].grid(True)
+        # axs[0].set_title("Pressure Graph")
+        # axs[0].legend(loc="upper right")
+
+        # # Second subplot
+        # axs[1].plot(cop[side][1], label="COP")  # Adjust x and y accordingly
+        # axs[1].plot(xr, label="filter COP")  # Adjust x and y accordingly
+        # # add the peaks (positive and negative)
+        # axs[1].plot(peaks[side]["positive"], xr[peaks[side]["positive"]], "o", linewidth=3, label="toe lift")
+        # axs[1].plot(peaks[side]["negative"], xr[peaks[side]["negative"]], "o", linewidth=3, label="heel strike")
+        # axs[1].set_xlabel("Time")
+        # axs[1].set_ylabel("COP position [mm]")
+        # axs[1].grid(True)
+        # axs[1].set_title("COP Graph")
+        # axs[1].legend(loc="upper right")
+
+        # plt.tight_layout()
+        # plt.show()
 
         # ---------------------------------- Results --------------------------------- #
 
@@ -150,6 +181,7 @@ def start_analysis(data, date):
         gait_speed[side] = calculate_gait_speed(r_timings, r_pairs, acc[side][mask[side]].reset_index().iloc[:, 1])
         r_velocity = find_cop_velocity(xr, r_timings["step"], r_pairs["step"])
         cadence = len(peaks[side]["positive"]) / (len(activity_input_right) * 0.05 / 60) * 2  # ? *2 for both feet
+
         right_data = {
             # 'File': file_right,
             "Date": date.split(" ")[0],
