@@ -1,71 +1,27 @@
 from cmath import pi
+import os
+from re import X
 import pandas as pd
 import numpy as np
-from scipy.signal import butter, filtfilt
-
-
-def load_combined_file(file, filter=False, regressions=None, frequency=20, cutoff=1.8, order=4):
-    left_data, right_data = read_combined_file(file)
-
-    xLeft = pd.DataFrame()
-    xRight = pd.DataFrame()
-    if filter:
-        print("Filtering data")
-        for col in left_data.columns:
-            if col in [
-                "ms",
-                "acc_x",
-                "acc_y",
-                "acc_z",
-                "gyro_x",
-                "gyro_y",
-                "gyro_z",
-                "Session_no",
-                "Timestamp",
-                "battery",
-            ]:  # Don't filter
-                xLeft[col] = left_data[col]
-                xRight[col] = right_data[col]
-                continue
-            xLeft[col] = butter_lowpass_filter(left_data[col], cutoff=cutoff, fs=frequency, order=order)
-            xRight[col] = butter_lowpass_filter(right_data[col], cutoff=cutoff, fs=frequency, order=order)
-            # Substitute negative signals with 0 in raw columns
-        raw_columns = [col for col in xLeft.columns if col.startswith("raw_")]
-        xLeft[raw_columns] = xLeft[raw_columns].clip(lower=1)
-        xRight[raw_columns] = xRight[raw_columns].clip(lower=1)
-    else:
-        xLeft = left_data
-        xRight = right_data
-
-    return xLeft, xRight
+from utils.filters import butter_lowpass_filter
 
 
 def load_file(file, filter=False, regressions=None, cutoff=1.8):
     # Read the data -------------------------------------------------------
+    print("--------------")
     raw_data = read_data(file)
-
     x = pd.DataFrame()  # Buffer for filtered data
     # Filter the data -----------------------------------------------------
     if filter:  # If the filter is not used
         print("Filtering data")
         for col in raw_data.columns:
-            if col in [
-                "acc_x",
-                "acc_y",
-                "acc_z",
-                "gyro_x",
-                "gyro_y",
-                "gyro_z",
-                "Session_no",
-                "Timestamp",
-                "battery",
-            ]:  # Don't filter
+            if col in ["acc_x", "acc_y", "acc_z", "gyro_x", "gyro_y", "gyro_z", "Session_no", "Timestamp", "battery"]:  # Don't filter
                 x[col] = raw_data[col]
                 continue
             x[col] = butter_lowpass_filter(raw_data[col], cutoff=cutoff, fs=20)
             # Substitute negative signals with 0 in raw columns
             raw_columns = [col for col in x.columns if col.startswith("raw_")]
-            x[raw_columns] = x[raw_columns].clip(lower=1)
+            x[raw_columns] = x[raw_columns].clip(lower=0)
     else:
         x = raw_data
 
@@ -77,7 +33,7 @@ def load_file(file, filter=False, regressions=None, cutoff=1.8):
         if "Left" in file:
             print("left insole")
             x = convert_to_pressure(x, regressions[0])
-        elif "Right" in file:
+        if "Right" in file:
             print("right insole")
             x = convert_to_pressure(x, regressions[1])
     # ---------------------------------------------------------------------
@@ -106,23 +62,14 @@ def load_data(files, filter=False, regressions=None):
     sessions = []
     for file in files:
         # Read the data -------------------------------------------------------
+        print("--------------")
         raw_data = read_data(file)
         x = pd.DataFrame()  # Buffer for filtered data
         # Filter the data -----------------------------------------------------
         if filter:  # If the filter is not used
             print("Filtering data")
             for col in raw_data.columns:
-                if col in [
-                    "acc_x",
-                    "acc_y",
-                    "acc_z",
-                    "gyro_x",
-                    "gyro_y",
-                    "gyro_z",
-                    "Session_no",
-                    "Timestamp",
-                    "battery",
-                ]:  # Don't filter
+                if col in ["acc_x", "acc_y", "acc_z", "gyro_x", "gyro_y", "gyro_z", "Session_no", "Timestamp", "battery"]:  # Don't filter
                     x[col] = raw_data[col]
                     continue
                 x[col] = butter_lowpass_filter(raw_data[col], cutoff=1.8, fs=20)
@@ -147,30 +94,6 @@ def load_data(files, filter=False, regressions=None):
     return data
 
 
-def read_combined_file(filename):
-    """Find data files from the os data path and read the data
-
-    Args:
-        param path: A string with the path to the data files
-
-    Returns:
-    DataFrame with the data
-    """
-    # print("reading data file", filename)
-
-    df = filename  # pd.read_csv(filename, sep=",")
-    print(f"{len(df.columns)} columns found")
-    left_columns = [col for col in df.columns if "left" in col or "ms" in col]
-    right_columns = [col for col in df.columns if "right" in col or "ms" in col]
-
-    df_left = df[left_columns]
-    df_left.columns = [col.replace("_left", "") for col in df_left.columns]
-    df_right = df[right_columns]
-    df_right.columns = [col.replace("_right", "") for col in df_right.columns]
-
-    return df_left, df_right
-
-
 def read_data(filename):
     """Find data files from the os data path and read the data
 
@@ -184,8 +107,6 @@ def read_data(filename):
     try:
         df = pd.read_csv(filename, sep=",", header=None)
         print(f"{len(df.columns)} columns found")
-        if len(df.columns) > 24:
-            print("File too large, use read_combined_file() instead")
 
         if len(df.columns) == 23:
             df.columns = [
@@ -215,7 +136,7 @@ def read_data(filename):
             ]
             df["time"] = np.arange(0, len(df["raw_1"])) / 20
 
-        elif len(df.columns) == 24:
+        elif len(df.columns) > 23:
             df.columns = [
                 "time",
                 "raw_1",
@@ -337,16 +258,7 @@ def convert_to_pressure(data, regression_coefficients):
         * regression_coefficients
     )
     for col in data.columns:
-        if col in [
-            "time",
-            "acc_x",
-            "acc_y",
-            "acc_z",
-            "gyro_x",
-            "gyro_y",
-            "gyro_z",
-            "Timestamp",
-        ]:
+        if col in ["time", "acc_x", "acc_y", "acc_z", "gyro_x", "gyro_y", "gyro_z", "Timestamp"]:
             pressure_data[col] = data[col]
 
     return pressure_data
@@ -405,12 +317,3 @@ def get_overall_signal(data, signal):
         data["Total Gyro"] = np.sqrt((np.square(data["gyro_x"]) + np.square(data["gyro_y"]) + np.square(data["gyro_z"])))
         # data = data.iloc[:, 17:20]
         return data
-
-
-def butter_lowpass_filter(signal, cutoff=5, fs=20, order=4):
-    """Return a low-pass filtered signal."""
-    nyq = 0.5 * fs  # Nyquist frequency
-    normal_cutoff = cutoff / nyq  # Normalize the cutoff
-    b, a = butter(order, normal_cutoff, btype="low", analog=False)  # Filter coefficients
-    y = filtfilt(b, a, signal)  # Filter the signal
-    return y

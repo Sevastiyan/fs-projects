@@ -13,14 +13,15 @@ def main():
     subjects = ["htx_test"]
     # subject = "mci004"
     dates = [
-        "2024-04-26",
+        "2024-06-20",
     ]
     for subject in subjects:
+        print(subject)
         root_folder = "./Extract data from database"
         # dates = os.listdir(f"{root_folder}/csv/{subject}")
 
         for date in dates:
-            print("Creating JSON file...")
+            print("Creating JSON file...", date)
             date = date.split(" ")[0]
 
             root_file = f"{date} {subject}"

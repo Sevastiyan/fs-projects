@@ -17,7 +17,7 @@ prom = 10
 dist = 14
 
 dates_to_include = [
-    "2024-04-26",
+    "2024-06-20",
 ]
 
 files = {}
