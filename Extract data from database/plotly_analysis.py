@@ -7,6 +7,7 @@ from scipy.signal import find_peaks
 from utils.data_loader import load_file, convert_signal
 from utils.filters import butter_lowpass_filter
 import utils.cop as Cop
+import matplotlib.pyplot as plt
 
 # Global constants
 FREQ = 0.01
@@ -121,6 +122,13 @@ def process_data(subject: str, dates: List[str]):
 
                 cop_data = process_cop(left_data, right_data)
                 add_cop_traces(fig_cop, cop_data["left"], row_cop, 1)
+
+                # Matplotlib plot of cop
+                plt.figure(figsize=(10, 5))
+                plt.plot(cop_data["left"]["cop"][0], color="blue")
+                plt.plot(cop_data["right"]["cop"][0], color="red")
+                plt.show()
+
                 add_cop_traces(fig_cop, cop_data["right"], row_cop, 2)
 
                 row_cop += 1
@@ -138,8 +146,8 @@ def process_data(subject: str, dates: List[str]):
             f.write_html(f"{plots_path}/{name}.html")
 
 def main():
-    subject = "htx5"
-    dates_to_include = ["2024-08-05"]
+    subject = "htx4"
+    dates_to_include = ["2024-08-20"]
     process_data(subject, dates_to_include)
 
 if __name__ == "__main__":
