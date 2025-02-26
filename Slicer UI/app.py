@@ -81,9 +81,14 @@ class App(customtkinter.CTk):
         self.ax1.clear()
         self.ax2.clear()
         self.acc_signal, self.gyro_signal = self.get_signal(self.index)
+
+        # # Augment the signal by stretching it
+        # factor = 1.2  # Example factor, you can adjust this as needed
+        # self.acc_signal = self.adjust_sampling_array(self.acc_signal, factor)
+        # self.gyro_signal = self.adjust_sampling_array(self.gyro_signal, factor)
+
         self.t = range(self.acc_signal.shape[0])
         (self.line,) = self.ax1.plot(self.t, self.acc_signal)
-        # borders = (len(self.t) / 2, len(self.t) / 2 + 200)
         print('slice before save', self.slider_1.get() * len(self.t))
         borders = (self.slider_1.get() * len(self.t), self.slider_1.get() * len(self.t) + 200)
 
@@ -95,6 +100,21 @@ class App(customtkinter.CTk):
         print('Max value: ', max(self.line.get_data()[1]))
         self.update_progress()
         self.canvas.draw()
+
+    def adjust_sampling_array(self, array, factor=1.0):
+        """
+        Resample array by a given factor.
+        """
+        if factor == 1.0:
+            return array
+
+        original_indices = np.arange(len(array))
+        new_length = int(len(array) * factor)
+        new_indices = np.linspace(0, len(array) - 1, new_length)
+        resampled_array = np.interp(new_indices, original_indices, array)
+        print(f'Original length: {len(array)}, New length: {len(resampled_array)}')
+
+        return resampled_array
 
     def get_signal(self, index):
         sample = self.data[index]
@@ -123,19 +143,30 @@ class App(customtkinter.CTk):
         print('Progress: ', self.index, '/', length)
 
     def save_slice(self):
-        x = int(self.slider_1.get() * len(self.t))  # convert from fraction to data where
-        print('Slice after save', x)
-        acc_slice = self.acc_signal[x : x + 200]
-        if len(acc_slice) < 200:  # Padding
-            acc_slice = np.resize(acc_slice, (200))
-        self.results['acc'].append(acc_slice)
+        original_x = int(self.slider_1.get() * len(self.t))  # convert from fraction to data where
+        print('Original slice position:', original_x)
 
-        gyro_slice = self.gyro_signal[x : x + 200]
-        if len(gyro_slice) < 200:  # Padding
-            gyro_slice = np.resize(gyro_slice, (200))
-        self.results['gyro'].append(gyro_slice)
+        for factor in np.arange(0.7, 1.6, 0.1):
+            # Augment the signal by stretching it
+            augmented_acc_signal = self.adjust_sampling_array(self.acc_signal, factor)
+            augmented_gyro_signal = self.adjust_sampling_array(self.gyro_signal, factor)
 
-        print('Slice Shape: ', acc_slice.shape)
+            # Adjust x based on the factor
+            x = int(original_x * factor)
+            print(f'Factor: {factor}, Adjusted slice position: {x}')
+
+            acc_slice = augmented_acc_signal[x : x + 200]
+            if len(acc_slice) < 200:  # Padding
+                acc_slice = np.resize(acc_slice, (200))
+            self.results['acc'].append(acc_slice)
+
+            gyro_slice = augmented_gyro_signal[x : x + 200]
+            if len(gyro_slice) < 200:  # Padding
+                gyro_slice = np.resize(gyro_slice, (200))
+            self.results['gyro'].append(gyro_slice)
+
+            print(f'Factor: {factor}, Slice Shape: {acc_slice.shape}')
+
         self.update_figure()
         # self.slider_1.set(0.5) # len(self.t) / 2)
 
@@ -157,7 +188,7 @@ class App(customtkinter.CTk):
 
 def main():
     # ----- Data Load -----
-    root = 'data/2022-10/Slip'
+    root = 'data/2022-10/Trip'
     file_list = []
     filenames = []
 

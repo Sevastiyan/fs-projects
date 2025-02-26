@@ -6,7 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 
-from utils.data_loader import load_data, load_file, convert_signal
+from utils.data_loader import load_data, convert_signal
 from utils.slice import slice_data
 import os
 
@@ -15,31 +15,15 @@ customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-bl
 
 
 class App(customtkinter.CTk):
-    def __init__(self, folder):  # Add the data source
+    def __init__(self, data):  # Add the data source
         super().__init__()
 
         self.geometry("700x800")
         self.title("CustomTkinter")
         self.index = 0
-        self.root_folder = folder
-        self.files_list = []
-        self.file_names = []
+        self.data = data
         self.results = {'acc': [], 'gyro': []}
         self.create_widgets()
-        self.load_data()
-
-    def load_data(self):
-        for file in os.listdir(self.root_folder):
-            if file in ['processed', '2022-12-06']:  # Skip folders
-                continue
-            self.files_list.append(os.path.join(self.root_folder, file))  # .replace("\\","/")
-            self.filenames.append(file)
-
-        print(self.file_list)
-
-    def read_data(self, file_name):
-
-        pass
 
     def create_widgets(self):
         self.fig, (self.ax1, self.ax2) = plt.subplots(2)
@@ -53,7 +37,7 @@ class App(customtkinter.CTk):
         self.folder_frame = customtkinter.CTkFrame(master=self)
         self.folder_frame.grid(row=5, column=0, rowspan=2, padx=20, pady=(20, 0), sticky="ew")
 
-        self.button_slice = customtkinter.CTkButton(master=self, text="Slice", fg_color="green", command=self.slice_data)
+        self.button_slice = customtkinter.CTkButton(master=self, text="Slice", fg_color="green", command=self.save_slice)
         self.button_slice.grid(row=1, column=2, padx=20, pady=5, sticky="ew")
 
         self.button_skip = customtkinter.CTkButton(master=self, text="Skip", fg_color="orange", command=self.update_figure)
@@ -99,7 +83,6 @@ class App(customtkinter.CTk):
         self.acc_signal, self.gyro_signal = self.get_signal(self.index)
         self.t = range(self.acc_signal.shape[0])
         (self.line,) = self.ax1.plot(self.t, self.acc_signal)
-        # borders = (len(self.t) / 2, len(self.t) / 2 + 200)
         print('slice before save', self.slider_1.get() * len(self.t))
         borders = (self.slider_1.get() * len(self.t), self.slider_1.get() * len(self.t) + 200)
 
@@ -111,6 +94,21 @@ class App(customtkinter.CTk):
         print('Max value: ', max(self.line.get_data()[1]))
         self.update_progress()
         self.canvas.draw()
+
+    def adjust_sampling_array(self, array, factor=1.0):
+        """
+        Resample array by a given factor.
+        """
+        if factor == 1.0:
+            return array
+
+        original_indices = np.arange(len(array))
+        new_length = int(len(array) * factor)
+        new_indices = np.linspace(0, len(array) - 1, new_length)
+        resampled_array = np.interp(new_indices, original_indices, array)
+        print(f'Original length: {len(array)}, New length: {len(resampled_array)}')
+
+        return resampled_array
 
     def get_signal(self, index):
         sample = self.data[index]
@@ -138,25 +136,41 @@ class App(customtkinter.CTk):
         self.text_var.set(value=f'Progress: {self.index}/{length}')
         print('Progress: ', self.index, '/', length)
 
-    def slice_data(self):
-        x = int(self.slider_1.get() * len(self.t))  # convert from fraction to data where
-        print('Slice after save', x)
-        acc_slice = self.acc_signal[x : x + 200]
-        if len(acc_slice) < 200:  # Padding
-            acc_slice = np.resize(acc_slice, (200))
-        self.results['acc'].append(acc_slice)
+    def save_slice(self):
+        slice_length = 200
+        step = 20
 
-        gyro_slice = self.gyro_signal[x : x + 200]
-        if len(gyro_slice) < 200:  # Padding
-            gyro_slice = np.resize(gyro_slice, (200))
-        self.results['gyro'].append(gyro_slice)
+        for start in range(0, len(self.t) - slice_length + 1, step):
+            original_x = start
+            print('Original slice position:', original_x)
 
-        print('Slice Shape: ', acc_slice.shape)
+            for factor in np.arange(0.8, 1.3, 0.1):
+                # Augment the signal by stretching it
+                augmented_acc_signal = self.adjust_sampling_array(self.acc_signal, factor)
+                augmented_gyro_signal = self.adjust_sampling_array(self.gyro_signal, factor)
+
+                # Adjust x based on the factor
+                x = int(original_x * factor)
+                print(f'Factor: {factor}, Adjusted slice position: {x}')
+
+                acc_slice = augmented_acc_signal[x : x + slice_length]
+                if len(acc_slice) < slice_length:  # Padding
+                    acc_slice = np.resize(acc_slice, (slice_length))
+                self.results['acc'].append(acc_slice)
+
+                gyro_slice = augmented_gyro_signal[x : x + slice_length]
+                if len(gyro_slice) < slice_length:  # Padding
+                    gyro_slice = np.resize(gyro_slice, (slice_length))
+                self.results['gyro'].append(gyro_slice)
+
+                print(f'Factor: {factor}, Slice Shape: {acc_slice.shape}')
+
+        print(len(self.results['acc']), len(self.results['gyro']))
         self.update_figure()
         # self.slider_1.set(0.5) # len(self.t) / 2)
 
     def save_file(self):
-        path = 'data/processed/cop'
+        path = 'data/processed/'
         if not os.path.isdir(path):
             os.makedirs(path)
 
@@ -173,7 +187,7 @@ class App(customtkinter.CTk):
 
 def main():
     # ----- Data Load -----
-    root = 'data/2022-10/Slip'
+    root = 'data/2022-10/Stairs'
     file_list = []
     filenames = []
 
